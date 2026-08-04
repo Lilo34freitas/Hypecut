@@ -55,7 +55,7 @@ export async function getAvailabilityForDate(
   endOfDay.setHours(businessHours.closeHour, businessHours.closeMin, 0, 0);
 
   // Fetch existing appointments for professional on target date (CONFIRMED or PENDING)
-  let existingAppointments: Array<{ startTime: Date; endTime: Date }> = [];
+  let dbAppts: Array<{ startTime: Date; endTime: Date }> = [];
   try {
     const appointments = await prisma.appointment.findMany({
       where: {
@@ -65,10 +65,34 @@ export async function getAvailabilityForDate(
       },
       select: { startTime: true, endTime: true },
     });
-    existingAppointments = appointments;
+    dbAppts = appointments;
   } catch (err) {
     console.warn('Fallback: DB not connected, returning mock availability slots.', err);
   }
+
+  // Merge local storage appointments
+  let localAppts: Array<{ startTime: Date; endTime: Date }> = [];
+  try {
+    const raw = localStorage.getItem('hypecut_appointments');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      localAppts = parsed
+        .filter((a: any) => {
+          if (a.status !== 'CONFIRMED' && a.status !== 'PENDING') return false;
+          if (professionalId !== 'any' && a.professionalId !== professionalId) return false;
+          const apptTime = new Date(a.startTime).getTime();
+          return apptTime >= startOfDay.getTime() && apptTime < endOfDay.getTime();
+        })
+        .map((a: any) => ({
+          startTime: new Date(a.startTime),
+          endTime: new Date(a.endTime),
+        }));
+    }
+  } catch (e) {
+    console.warn(e);
+  }
+
+  const existingAppointments = [...dbAppts, ...localAppts];
 
   // Generate 30-min candidate slots
   const slots: TimeSlot[] = [];

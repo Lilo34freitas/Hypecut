@@ -2,7 +2,7 @@ import { prisma } from './prisma';
 import { getAvailabilityForDate } from './bookingService';
 
 // Default mock fallback data if database is not yet migrated on Supabase
-const defaultProfessionals = [
+export const defaultProfessionals = [
   { id: 'pro-1', name: 'JONATHAN NEMECEK', role: 'Barbeiro & Fundador', specialties: 'Cortes na Tesoura • Visagismo • Barboterapia', avatarUrl: '/jonathan.png' },
   { id: 'pro-2', name: 'BRUNO', role: 'Artista & Tatuador', specialties: 'Lettering • Dark Art • Freehand', avatarUrl: '/bruno.png' },
   { id: 'pro-3', name: 'BOSCO', role: 'Barbeiro', specialties: 'Cabelo Afro • Barba • Corte Americano', avatarUrl: '/bosco.png' },
@@ -11,7 +11,7 @@ const defaultProfessionals = [
   { id: 'pro-6', name: 'PORKS', role: 'Barbeiro & Estilo', specialties: 'Cortes Modernos • Degradê • Pigmentação', avatarUrl: '/porks.png' },
 ];
 
-const defaultServices = [
+export const defaultServices = [
   { id: 'srv-1', name: 'Corte de Cabelo Masculino Stylist', category: 'barbearia', durationMin: 30, price: 60.0, description: 'Visagismo sob medida, corte com tesoura/máquina e finalização premium.' },
   { id: 'srv-2', name: 'Barboterapia com Toalha Quente', category: 'barbearia', durationMin: 30, price: 50.0, description: 'Esfoliação, óleo essencial, toalha quente e alinhamento na navalha.' },
   { id: 'srv-3', name: 'Combo VIP Complete', category: 'combos', durationMin: 60, price: 150.0, description: 'Corte + Barboterapia + Sobrancelha + Esfoliação facial.' },
@@ -20,6 +20,25 @@ const defaultServices = [
   { id: 'srv-6', name: 'Sessão de Tattoo Autoral / Consultoria', category: 'tattoo', durationMin: 60, price: 200.0, description: 'Consultoria e criação de projeto autoral sob medida.' },
   { id: 'srv-7', name: 'Limpeza de Pele & Cuidado Facial', category: 'estetica', durationMin: 30, price: 70.0, description: 'Remoção de cravos, esfoliação e hidratação profunda.' },
 ];
+
+export function getLocalAppointments(): any[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem('hypecut_appointments');
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+export function saveLocalAppointments(appts: any[]) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem('hypecut_appointments', JSON.stringify(appts));
+  } catch (err) {
+    console.error('Error saving local appointments:', err);
+  }
+}
 
 export async function fetchServices() {
   try {
@@ -61,9 +80,42 @@ export async function createAppointment(payload: CreateAppointmentPayload) {
   const start = new Date(payload.startTime);
   const end = new Date(start.getTime() + payload.durationMin * 60 * 1000);
 
+  const selectedService = defaultServices.find((s) => s.id === payload.serviceId) || {
+    id: payload.serviceId,
+    name: 'Serviço HypeCut',
+    price: 60,
+    durationMin: payload.durationMin,
+  };
+  const selectedPro = defaultProfessionals.find((p) => p.id === payload.professionalId) || {
+    id: payload.professionalId,
+    name: 'JONATHAN NEMECEK',
+    role: 'Barbeiro',
+  };
+
+  const newAppt = {
+    id: 'appt-' + Math.random().toString(36).substring(2, 9),
+    clientName: payload.clientName,
+    clientPhone: payload.clientPhone,
+    clientNotes: payload.clientNotes,
+    startTime: start.toISOString(),
+    endTime: end.toISOString(),
+    status: 'CONFIRMED',
+    serviceId: payload.serviceId,
+    professionalId: payload.professionalId,
+    service: selectedService,
+    professional: selectedPro,
+    createdAt: new Date().toISOString(),
+  };
+
+  // 1. Save to LocalStorage immediately for instant SPA UI update
+  const localList = getLocalAppointments();
+  saveLocalAppointments([newAppt, ...localList]);
+
+  // 2. Try DB in background
   try {
-    const appointment = await prisma.appointment.create({
+    await prisma.appointment.create({
       data: {
+        id: newAppt.id,
         clientName: payload.clientName,
         clientPhone: payload.clientPhone,
         clientNotes: payload.clientNotes,
@@ -73,37 +125,27 @@ export async function createAppointment(payload: CreateAppointmentPayload) {
         serviceId: payload.serviceId,
         professionalId: payload.professionalId,
       },
-      include: {
-        service: true,
-        professional: true,
-      },
     });
-    return appointment;
   } catch (err) {
-    console.warn('Fallback booking creation in local state:', err);
-    return {
-      id: 'appt-' + Math.random().toString(36).substring(2, 9),
-      clientName: payload.clientName,
-      clientPhone: payload.clientPhone,
-      startTime: start,
-      endTime: end,
-      status: 'CONFIRMED',
-      serviceId: payload.serviceId,
-      professionalId: payload.professionalId,
-    };
+    console.warn('DB creation fallback to local storage:', err);
   }
+
+  return newAppt;
 }
 
 export async function fetchAppointmentsForDate(dateStr: string) {
-  const targetDate = new Date(`${dateStr}T00:00:00`);
-  const startOfDay = new Date(targetDate);
-  startOfDay.setHours(0, 0, 0, 0);
+  const targetDateStr = dateStr;
 
-  const endOfDay = new Date(targetDate);
-  endOfDay.setHours(23, 59, 59, 999);
-
+  let dbAppts: any[] = [];
   try {
-    return await prisma.appointment.findMany({
+    const targetDate = new Date(`${dateStr}T00:00:00`);
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    dbAppts = await prisma.appointment.findMany({
       where: {
         startTime: { gte: startOfDay, lte: endOfDay },
       },
@@ -114,13 +156,36 @@ export async function fetchAppointmentsForDate(dateStr: string) {
       orderBy: { startTime: 'asc' },
     });
   } catch {
-    return [];
+    dbAppts = [];
   }
+
+  // Merge with LocalStorage appointments for that date
+  const localAppts = getLocalAppointments().filter((a) => {
+    const apptDateStr = new Date(a.startTime).toISOString().split('T')[0];
+    return apptDateStr === targetDateStr;
+  });
+
+  const mergedMap = new Map();
+  dbAppts.forEach((a) => mergedMap.set(a.id, a));
+  localAppts.forEach((a) => {
+    if (!mergedMap.has(a.id)) {
+      mergedMap.set(a.id, a);
+    }
+  });
+
+  return Array.from(mergedMap.values());
 }
 
 export async function updateAppointmentStatus(appointmentId: string, newStatus: string, cancelReason?: string) {
+  // Update LocalStorage
+  const localList = getLocalAppointments().map((a) =>
+    a.id === appointmentId ? { ...a, status: newStatus, ...(cancelReason ? { cancelReason } : {}) } : a
+  );
+  saveLocalAppointments(localList);
+
+  // Update DB in background
   try {
-    return await prisma.appointment.update({
+    await prisma.appointment.update({
       where: { id: appointmentId },
       data: {
         status: newStatus,
@@ -128,25 +193,37 @@ export async function updateAppointmentStatus(appointmentId: string, newStatus: 
       },
     });
   } catch (err) {
-    console.warn('Status update fallback:', err);
-    return { id: appointmentId, status: newStatus, cancelReason };
+    console.warn('DB status update fallback:', err);
   }
+
+  return { id: appointmentId, status: newStatus, cancelReason };
 }
 
 export async function findAppointmentsByPhone(phoneDigits: string) {
   const cleanPhone = phoneDigits.replace(/\D/g, '');
+
+  let dbAppts: any[] = [];
   try {
-    const all = await prisma.appointment.findMany({
+    dbAppts = await prisma.appointment.findMany({
       include: {
         service: true,
         professional: true,
       },
       orderBy: { startTime: 'asc' },
     });
-    return all.filter((a) => a.clientPhone.replace(/\D/g, '').includes(cleanPhone));
   } catch {
-    return [];
+    dbAppts = [];
   }
+
+  const localAppts = getLocalAppointments();
+  const mergedMap = new Map();
+  dbAppts.forEach((a) => mergedMap.set(a.id, a));
+  localAppts.forEach((a) => {
+    if (!mergedMap.has(a.id)) mergedMap.set(a.id, a);
+  });
+
+  const allMerged = Array.from(mergedMap.values());
+  return allMerged.filter((a) => (a.clientPhone || '').replace(/\D/g, '').includes(cleanPhone));
 }
 
 export interface UpdateAppointmentPayload {
@@ -165,8 +242,33 @@ export async function updateFullAppointment(payload: UpdateAppointmentPayload) {
   const start = new Date(payload.startTime);
   const end = new Date(start.getTime() + payload.durationMin * 60 * 1000);
 
+  const selectedService = defaultServices.find((s) => s.id === payload.serviceId) || {
+    id: payload.serviceId,
+    name: 'Serviço HypeCut',
+    price: 60,
+    durationMin: payload.durationMin,
+  };
+  const selectedPro = defaultProfessionals.find((p) => p.id === payload.professionalId) || {
+    id: payload.professionalId,
+    name: 'JONATHAN NEMECEK',
+    role: 'Barbeiro',
+  };
+
+  const updatedObj = {
+    ...payload,
+    startTime: start.toISOString(),
+    endTime: end.toISOString(),
+    service: selectedService,
+    professional: selectedPro,
+  };
+
+  // Update LocalStorage
+  const localList = getLocalAppointments().map((a) => (a.id === payload.id ? updatedObj : a));
+  saveLocalAppointments(localList);
+
+  // Update DB in background
   try {
-    return await prisma.appointment.update({
+    await prisma.appointment.update({
       where: { id: payload.id },
       data: {
         clientName: payload.clientName,
@@ -178,13 +280,10 @@ export async function updateFullAppointment(payload: UpdateAppointmentPayload) {
         endTime: end,
         status: payload.status,
       },
-      include: {
-        service: true,
-        professional: true,
-      },
     });
   } catch (err) {
     console.warn('Fallback update full appointment:', err);
-    return payload;
   }
+
+  return updatedObj;
 }
