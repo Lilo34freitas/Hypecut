@@ -47,12 +47,13 @@ export const StaffCalendarGrid: React.FC<StaffCalendarGridProps> = ({
 
               {/* Column for each Professional */}
               {professionals.map((pro) => {
-                // Find appointments starting in this hour slot for this professional
                 const matchingAppts = appointments.filter((a) => {
                   const apptDate = new Date(a.startTime);
                   const apptHour = apptDate.getHours();
-                  const apptProId = a.professionalId;
-                  return apptProId === pro.id && apptHour === hour;
+                  const proNameTarget = (pro.name || '').trim().toLowerCase();
+                  const apptProName = (a.professional?.name || '').trim().toLowerCase();
+                  const isSamePro = a.professionalId === pro.id || (proNameTarget && apptProName && proNameTarget === apptProName);
+                  return isSamePro && apptHour === hour;
                 });
 
                 return (

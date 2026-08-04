@@ -1,7 +1,6 @@
 import { prisma } from './prisma';
 import { getAvailabilityForDate } from './bookingService';
 
-// Default mock fallback data if database is not yet migrated on Supabase
 export const defaultProfessionals = [
   { id: 'pro-1', name: 'JONATHAN NEMECEK', role: 'Barbeiro & Fundador', specialties: 'Cortes na Tesoura • Visagismo • Barboterapia', avatarUrl: '/jonathan.png' },
   { id: 'pro-2', name: 'BRUNO', role: 'Artista & Tatuador', specialties: 'Lettering • Dark Art • Freehand', avatarUrl: '/bruno.png' },
@@ -20,6 +19,15 @@ export const defaultServices = [
   { id: 'srv-6', name: 'Sessão de Tattoo Autoral / Consultoria', category: 'tattoo', durationMin: 60, price: 200.0, description: 'Consultoria e criação de projeto autoral sob medida.' },
   { id: 'srv-7', name: 'Limpeza de Pele & Cuidado Facial', category: 'estetica', durationMin: 30, price: 70.0, description: 'Remoção de cravos, esfoliação e hidratação profunda.' },
 ];
+
+export function toLocalDateStr(dateInput: Date | string): string {
+  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+  if (isNaN(date.getTime())) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export function getLocalAppointments(): any[] {
   if (typeof window === 'undefined') return [];
@@ -80,17 +88,11 @@ export async function createAppointment(payload: CreateAppointmentPayload) {
   const start = new Date(payload.startTime);
   const end = new Date(start.getTime() + payload.durationMin * 60 * 1000);
 
-  const selectedService = defaultServices.find((s) => s.id === payload.serviceId) || {
-    id: payload.serviceId,
-    name: 'Serviço HypeCut',
-    price: 60,
-    durationMin: payload.durationMin,
-  };
-  const selectedPro = defaultProfessionals.find((p) => p.id === payload.professionalId) || {
-    id: payload.professionalId,
-    name: 'JONATHAN NEMECEK',
-    role: 'Barbeiro',
-  };
+  const allServices = await fetchServices();
+  const allPros = await fetchProfessionals();
+
+  const selectedService = allServices.find((s) => s.id === payload.serviceId || s.name === payload.serviceId) || defaultServices[0];
+  const selectedPro = allPros.find((p) => p.id === payload.professionalId || p.name === payload.professionalId) || defaultProfessionals[0];
 
   const newAppt = {
     id: 'appt-' + Math.random().toString(36).substring(2, 9),
@@ -100,8 +102,8 @@ export async function createAppointment(payload: CreateAppointmentPayload) {
     startTime: start.toISOString(),
     endTime: end.toISOString(),
     status: 'CONFIRMED',
-    serviceId: payload.serviceId,
-    professionalId: payload.professionalId,
+    serviceId: selectedService.id,
+    professionalId: selectedPro.id,
     service: selectedService,
     professional: selectedPro,
     createdAt: new Date().toISOString(),
@@ -122,8 +124,8 @@ export async function createAppointment(payload: CreateAppointmentPayload) {
         startTime: start,
         endTime: end,
         status: 'CONFIRMED',
-        serviceId: payload.serviceId,
-        professionalId: payload.professionalId,
+        serviceId: selectedService.id,
+        professionalId: selectedPro.id,
       },
     });
   } catch (err) {
@@ -134,8 +136,6 @@ export async function createAppointment(payload: CreateAppointmentPayload) {
 }
 
 export async function fetchAppointmentsForDate(dateStr: string) {
-  const targetDateStr = dateStr;
-
   let dbAppts: any[] = [];
   try {
     const targetDate = new Date(`${dateStr}T00:00:00`);
@@ -159,10 +159,10 @@ export async function fetchAppointmentsForDate(dateStr: string) {
     dbAppts = [];
   }
 
-  // Merge with LocalStorage appointments for that date
+  // Merge with LocalStorage appointments matching local YYYY-MM-DD
   const localAppts = getLocalAppointments().filter((a) => {
-    const apptDateStr = new Date(a.startTime).toISOString().split('T')[0];
-    return apptDateStr === targetDateStr;
+    const apptDateStr = toLocalDateStr(a.startTime);
+    return apptDateStr === dateStr;
   });
 
   const mergedMap = new Map();
@@ -242,17 +242,11 @@ export async function updateFullAppointment(payload: UpdateAppointmentPayload) {
   const start = new Date(payload.startTime);
   const end = new Date(start.getTime() + payload.durationMin * 60 * 1000);
 
-  const selectedService = defaultServices.find((s) => s.id === payload.serviceId) || {
-    id: payload.serviceId,
-    name: 'Serviço HypeCut',
-    price: 60,
-    durationMin: payload.durationMin,
-  };
-  const selectedPro = defaultProfessionals.find((p) => p.id === payload.professionalId) || {
-    id: payload.professionalId,
-    name: 'JONATHAN NEMECEK',
-    role: 'Barbeiro',
-  };
+  const allServices = await fetchServices();
+  const allPros = await fetchProfessionals();
+
+  const selectedService = allServices.find((s) => s.id === payload.serviceId) || defaultServices[0];
+  const selectedPro = allPros.find((p) => p.id === payload.professionalId) || defaultProfessionals[0];
 
   const updatedObj = {
     ...payload,
