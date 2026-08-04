@@ -26,14 +26,23 @@ function ScrollToHashElement() {
 import { useState } from 'react';
 import { AdminPage } from './pages/AdminPage';
 import { BookingWizard } from './components/ui/BookingWizard';
+import { ClientManageModal } from './components/ui/ClientManageModal';
 
 function App() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isManageOpen, setIsManageOpen] = useState(false);
 
   useEffect(() => {
     const handleOpenBooking = () => setIsBookingOpen(true);
+    const handleOpenManage = () => setIsManageOpen(true);
+
     window.addEventListener('open-booking-modal', handleOpenBooking);
-    return () => window.removeEventListener('open-booking-modal', handleOpenBooking);
+    window.addEventListener('open-manage-modal', handleOpenManage);
+
+    return () => {
+      window.removeEventListener('open-booking-modal', handleOpenBooking);
+      window.removeEventListener('open-manage-modal', handleOpenManage);
+    };
   }, []);
 
   useEffect(() => {
@@ -71,6 +80,7 @@ function App() {
       </Routes>
       <WhatsAppWidget />
       <BookingWizard isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
+      <ClientManageModal isOpen={isManageOpen} onClose={() => setIsManageOpen(false)} />
     </BrowserRouter>
   );
 }

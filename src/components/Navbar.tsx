@@ -150,6 +150,16 @@ export const Navbar = () => {
               Contato
             </button>
 
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-manage-modal'))}
+              className={cn(
+                "font-bold tracking-wider text-[#5E308A] hover:underline transition-all duration-500 uppercase cursor-pointer whitespace-nowrap",
+                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.8rem]" : "text-[0.75rem] md:text-[0.78rem] xl:text-[0.9rem]"
+              )}
+            >
+              Meus Agendamentos
+            </button>
+
             {/* CTA AGENDAR Button on Far Right */}
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('open-booking-modal'))}

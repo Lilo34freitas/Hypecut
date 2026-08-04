@@ -33,6 +33,7 @@ model Appointment {
   clientName     String
   clientPhone    String
   clientNotes    String?
+  cancelReason   String?
   startTime      DateTime
   endTime        DateTime
   status         String       @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED

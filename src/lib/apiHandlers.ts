@@ -118,14 +118,73 @@ export async function fetchAppointmentsForDate(dateStr: string) {
   }
 }
 
-export async function updateAppointmentStatus(appointmentId: string, newStatus: string) {
+export async function updateAppointmentStatus(appointmentId: string, newStatus: string, cancelReason?: string) {
   try {
     return await prisma.appointment.update({
       where: { id: appointmentId },
-      data: { status: newStatus },
+      data: {
+        status: newStatus,
+        ...(cancelReason ? { cancelReason } : {}),
+      },
     });
   } catch (err) {
     console.warn('Status update fallback:', err);
-    return { id: appointmentId, status: newStatus };
+    return { id: appointmentId, status: newStatus, cancelReason };
+  }
+}
+
+export async function findAppointmentsByPhone(phoneDigits: string) {
+  const cleanPhone = phoneDigits.replace(/\D/g, '');
+  try {
+    const all = await prisma.appointment.findMany({
+      include: {
+        service: true,
+        professional: true,
+      },
+      orderBy: { startTime: 'asc' },
+    });
+    return all.filter((a) => a.clientPhone.replace(/\D/g, '').includes(cleanPhone));
+  } catch {
+    return [];
+  }
+}
+
+export interface UpdateAppointmentPayload {
+  id: string;
+  clientName: string;
+  clientPhone: string;
+  clientNotes?: string;
+  serviceId: string;
+  professionalId: string;
+  startTime: string; // ISO String
+  durationMin: number;
+  status: string;
+}
+
+export async function updateFullAppointment(payload: UpdateAppointmentPayload) {
+  const start = new Date(payload.startTime);
+  const end = new Date(start.getTime() + payload.durationMin * 60 * 1000);
+
+  try {
+    return await prisma.appointment.update({
+      where: { id: payload.id },
+      data: {
+        clientName: payload.clientName,
+        clientPhone: payload.clientPhone,
+        clientNotes: payload.clientNotes,
+        serviceId: payload.serviceId,
+        professionalId: payload.professionalId,
+        startTime: start,
+        endTime: end,
+        status: payload.status,
+      },
+      include: {
+        service: true,
+        professional: true,
+      },
+    });
+  } catch (err) {
+    console.warn('Fallback update full appointment:', err);
+    return payload;
   }
 }
