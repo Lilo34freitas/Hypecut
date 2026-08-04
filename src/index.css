@@ -1,0 +1,346 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 140px;
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  :root {
+    /* === BACKGROUNDS === */
+    --bg-darkest: #0B0908;
+    --bg-dark: #1C1210;
+    --bg-space: #1a0f1f;
+    --bg-card: #2C0F28;
+    --bg-card-hover: #1C1210;
+
+    /* === SURFACES === */
+    --surface-glass: rgba(242, 234, 217, 0.95);
+    --surface-border: rgba(11, 9, 8, 0.1);
+    --surface-border-hover: rgba(11, 9, 8, 0.3);
+
+    /* === TEXT === */
+    --text-primary: #F2EAD9;
+    --text-secondary: #A67F8B;
+    --text-muted: #6E6259;
+    --text-accent: #5E308A;
+    --text-brand: #ef4444;
+
+    /* === GRADIENTS === */
+    --gradient-bg: none;
+    --gradient-avatar: linear-gradient(135deg, #5E308A, #4A2370);
+    --gradient-cta: linear-gradient(135deg, #5E308A 0%, #4A2370 100%);
+    --gradient-nordeste: linear-gradient(135deg, #f97316 0%, #fbbf24 50%, #ef4444 100%);
+    --gradient-card: linear-gradient(135deg, rgba(94, 48, 138, 0.1) 0%, rgba(74, 35, 112, 0.1) 100%);
+
+    /* === TYPOGRAPHY === */
+    --font-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-display: 'Outfit', 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  body {
+    background: var(--bg-dark);
+    background-image: var(--gradient-bg);
+    background-attachment: fixed;
+    color: var(--text-primary);
+    font-family: var(--font-primary);
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    max-width: 100vw;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .btn-cta {
+    background-image: var(--gradient-cta);
+    @apply text-white font-semibold rounded-full px-6 py-3 transition-transform hover:scale-105 shadow-[0_4px_20px_rgba(239,68,68,0.3)];
+  }
+
+  .card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--surface-border);
+    @apply rounded-xl backdrop-blur-md transition-all hover:-translate-y-1 hover:border-[var(--surface-border-hover)] hover:bg-[var(--bg-card-hover)];
+  }
+
+  /* Dot Typing Animation - Slow & Pixelated (abrupt) */
+  @keyframes dot-1 { 0% { opacity: 0; } 20%, 85% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes dot-2 { 0%, 20% { opacity: 0; } 40%, 85% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes dot-3 { 0%, 40% { opacity: 0; } 60%, 85% { opacity: 1; } 100% { opacity: 0; } }
+
+  .dot-typing:nth-child(1) { animation: dot-1 3s infinite steps(1, end); }
+  .dot-typing:nth-child(2) { animation: dot-2 3s infinite steps(1, end); }
+  .dot-typing:nth-child(3) { animation: dot-3 3s infinite steps(1, end); }
+
+  /* Button Agendar CTA */
+  .btn-agendar {
+    @apply flex items-center px-8 py-3 text-2xl text-white bg-text-accent border-none cursor-pointer relative;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 6px 6px 0 var(--bg-darkest);
+    transform: skewX(-15deg);
+    text-decoration: none;
+  }
+  .btn-agendar:hover {
+    box-shadow: 6px 6px 0 var(--text-primary);
+  }
+  .btn-agendar .btn-text {
+    transform: skewX(15deg);
+    @apply font-display font-bold uppercase tracking-wider;
+  }
+  .btn-agendar .btn-icon-wrapper {
+    transition: transform 0.3s ease;
+    width: 20px;
+    margin-left: 24px;
+    margin-right: 12px;
+    position: relative;
+    top: 2px;
+  }
+  .btn-agendar:hover .btn-icon-wrapper {
+    transform: translateX(10px);
+  }
+  .btn-agendar .arrow-one {
+    transition: 0.4s;
+    transform: translateX(-60%);
+  }
+  .btn-agendar .arrow-two {
+    transition: 0.5s;
+    transform: translateX(-30%);
+  }
+  .btn-agendar:hover .arrow-three {
+    animation: arrow-color-anim 1s infinite 0.2s;
+  }
+  .btn-agendar:hover .arrow-one {
+    transform: translateX(0%);
+    animation: arrow-color-anim 1s infinite 0.6s;
+  }
+  .btn-agendar:hover .arrow-two {
+    transform: translateX(0%);
+    animation: arrow-color-anim 1s infinite 0.4s;
+  }
+
+  /* Uiverse Circular Tabs for Services */
+  .cir-tabs {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    background: #18181b;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 999px;
+    box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.5);
+  }
+
+  .cir-tabs__t {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 38px;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-primary);
+    opacity: 0.7;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .cir-tabs__t:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .cir-tabs__t.active {
+    background: #5E308A;
+    color: #FFFFFF;
+    opacity: 1;
+    box-shadow: 0 4px 15px -3px rgba(94, 48, 138, 0.5);
+  }
+
+  /* Custom Scrollbar Hide Utility */
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Infinite Marquee Loop for Reviews */
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+  }
+
+  .animate-marquee {
+    display: flex;
+    width: max-content;
+    animation: marquee 35s linear infinite;
+  }
+
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+
+  /* Uiverse Interactive CTA Button (Off-White Base with Dark Curtain Hover) */
+  .Btn {
+    padding: 0 32px;
+    height: 52px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #F2EAD9;
+    border: 2px solid #F2EAD9;
+    color: #0B0908;
+    font-weight: 900;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0;
+    text-decoration: none;
+  }
+
+  .Btn span,
+  .Btn svg,
+  .Btn .btn-text,
+  .Btn .btn-icon-wrapper {
+    position: relative;
+    z-index: 2;
+    transition: color 0.35s ease, fill 0.35s ease, stroke 0.35s ease, transform 0.35s ease;
+  }
+
+  .Btn svg path {
+    transition: fill 0.35s ease;
+  }
+
+  .Btn::before {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    content: "";
+    background-color: #0B0908;
+    left: -100%;
+    top: 0;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 0;
+  }
+
+  .Btn:hover::before {
+    transform: translateX(100%);
+  }
+
+  .Btn:hover span,
+  .Btn:hover .btn-text {
+    color: #F2EAD9;
+  }
+
+  .Btn:hover svg {
+    color: #F2EAD9;
+    stroke: #F2EAD9;
+  }
+
+  .Btn:hover svg path {
+    fill: #F2EAD9;
+  }
+
+  .Btn:active {
+    transform: translate(2px, 2px);
+  }
+
+  /* Brand Purple Uiverse Btn (Purple Base with Off-White Curtain Hover) */
+  .Btn-purple {
+    padding: 0 28px;
+    height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #5E308A;
+    border: 2px solid #5E308A;
+    color: #F2EAD9;
+    font-weight: 900;
+    gap: 10px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(94, 48, 138, 0.3);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 0;
+    text-decoration: none;
+  }
+
+  .Btn-purple span,
+  .Btn-purple svg,
+  .Btn-purple .btn-text,
+  .Btn-purple .btn-icon-wrapper {
+    position: relative;
+    z-index: 2;
+    transition: color 0.35s ease, fill 0.35s ease, stroke 0.35s ease, transform 0.35s ease;
+  }
+
+  .Btn-purple svg path {
+    transition: fill 0.35s ease;
+  }
+
+  .Btn-purple::before {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    content: "";
+    background-color: #F2EAD9;
+    left: -100%;
+    top: 0;
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+    z-index: 1;
+    border-radius: 0;
+  }
+
+  .Btn-purple:hover::before {
+    transform: translateX(100%);
+  }
+
+  .Btn-purple:hover span,
+  .Btn-purple:hover .btn-text {
+    color: #0B0908;
+  }
+
+  .Btn-purple:hover svg {
+    color: #0B0908;
+    stroke: #0B0908;
+  }
+
+  .Btn-purple:hover svg path {
+    fill: #0B0908;
+  }
+
+  .Btn-purple:active {
+    transform: translate(2px, 2px);
+  }
+  
+  @keyframes arrow-color-anim {
+    0% { fill: white; }
+    50% { fill: var(--bg-darkest); }
+    100% { fill: white; }
+  }
+}
