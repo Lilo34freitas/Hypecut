@@ -151,18 +151,16 @@ export const Navbar = () => {
             </button>
 
             {/* CTA AGENDAR Button on Far Right */}
-            <a
-              href="https://wa.me/5547999595843?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20um%20hor%C3%A1rio%20na%20HypeCut."
-              target="_blank"
-              rel="noreferrer"
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-booking-modal'))}
               className={cn(
                 "Btn-purple shrink-0 ml-1.5 sm:ml-3 whitespace-nowrap cursor-pointer shadow-md",
                 effectiveScrolled ? "!h-9 !px-3 md:!px-4 text-[0.72rem]" : "!h-10 md:!h-11 !px-4 md:!px-6 text-[0.78rem] md:text-[0.85rem]"
               )}
             >
               <Calendar size={effectiveScrolled ? 14 : 16} />
-              <span>AGENDAR</span>
-            </a>
+              <span>AGENDAR HORÁRIO</span>
+            </button>
           </div>
 
           {/* Mobile Toggle with 44px x 44px Touch Target */}
@@ -198,16 +196,16 @@ export const Navbar = () => {
               >
                 Contato
               </button>
-              <a
-                href="https://wa.me/5547999595843?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20um%20hor%C3%A1rio%20na%20HypeCut."
-                target="_blank"
-                rel="noreferrer"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="w-full py-3 px-5 bg-[#5E308A] hover:bg-[#6C3DFF] text-[#F2EAD9] font-black text-xs uppercase tracking-widest rounded-none transition-all flex items-center justify-center gap-2 mt-2 shadow-lg"
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  window.dispatchEvent(new CustomEvent('open-booking-modal'));
+                }}
+                className="w-full py-3 px-5 bg-[#5E308A] hover:bg-[#6C3DFF] text-[#F2EAD9] font-black text-xs uppercase tracking-widest rounded-none transition-all flex items-center justify-center gap-2 mt-2 shadow-lg cursor-pointer"
               >
                 <Calendar size={16} />
                 <span>AGENDAR HORÁRIO</span>
-              </a>
+              </button>
             </motion.div>
           )}
         </AnimatePresence>

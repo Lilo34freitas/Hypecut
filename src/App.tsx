@@ -23,7 +23,19 @@ function ScrollToHashElement() {
   return null;
 }
 
+import { useState } from 'react';
+import { AdminPage } from './pages/AdminPage';
+import { BookingWizard } from './components/ui/BookingWizard';
+
 function App() {
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenBooking = () => setIsBookingOpen(true);
+    window.addEventListener('open-booking-modal', handleOpenBooking);
+    return () => window.removeEventListener('open-booking-modal', handleOpenBooking);
+  }, []);
+
   useEffect(() => {
     const lenis = new Lenis({
       duration: 1.2,
@@ -55,8 +67,10 @@ function App() {
         <Route path="/sobre" element={<AboutPage />} />
         <Route path="/servicos" element={<ServicesPage />} />
         <Route path="/tattoo" element={<TattooPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
       <WhatsAppWidget />
+      <BookingWizard isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
     </BrowserRouter>
   );
 }

@@ -1,5 +1,8 @@
+import animate from 'tailwindcss-animate';
+
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: ['class'],
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -9,6 +12,7 @@ export default {
       colors: {
         'bg-darkest': '#0B0908',
         'bg-dark': '#1C1210',
+        'bg-[#2C0F28]': '#2C0F28',
         'bg-card': '#2C0F28',
         'surface-glass': 'rgba(242, 234, 217, 0.95)',
         'surface-border': 'rgba(11, 9, 8, 0.1)',
@@ -19,6 +23,44 @@ export default {
         'text-accent-hover': '#4A2370',
         'nav-bg': '#F2EAD9',
         'nav-text': '#0B0908',
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))'
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))'
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))'
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))'
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))'
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))'
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))'
+        }
+      },
+      borderRadius: {
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)'
       },
       fontFamily: {
         primary: ['Inter', '-apple-system', 'sans-serif'],
@@ -39,5 +81,5 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [animate],
 }

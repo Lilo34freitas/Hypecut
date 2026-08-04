@@ -1,0 +1,44 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Service {
+  id          String        @id @default(uuid())
+  name        String
+  category    String        // 'barbearia' | 'combos' | 'tattoo' | 'estetica'
+  durationMin Int           @default(30)
+  price       Float
+  description String?
+  appointments Appointment[]
+  createdAt   DateTime      @default(now())
+}
+
+model Professional {
+  id          String        @id @default(uuid())
+  name        String
+  role        String
+  avatarUrl   String?
+  specialties String?
+  appointments Appointment[]
+  createdAt   DateTime      @default(now())
+}
+
+model Appointment {
+  id             String       @id @default(uuid())
+  clientName     String
+  clientPhone    String
+  clientNotes    String?
+  startTime      DateTime
+  endTime        DateTime
+  status         String       @default("PENDING") // PENDING, CONFIRMED, CANCELLED, COMPLETED
+  serviceId      String
+  professionalId String
+  service        Service      @relation(fields: [serviceId], references: [id])
+  professional   Professional @relation(fields: [professionalId], references: [id])
+  createdAt      DateTime     @default(now())
+}
