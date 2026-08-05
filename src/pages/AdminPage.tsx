@@ -13,6 +13,7 @@ import {
   fetchAppointmentsForDate,
   updateAppointmentStatus,
   fetchProfessionals,
+  toLocalDateStr,
 } from '../lib/apiHandlers';
 import { StaffCalendarGrid } from '../components/ui/StaffCalendarGrid';
 import { EditAppointmentModal } from '../components/ui/EditAppointmentModal';
@@ -23,8 +24,9 @@ export const AdminPage: React.FC = () => {
   const [authError, setAuthError] = useState<boolean>(false);
 
   const [selectedDate, setSelectedDate] = useState<string>(
-    new Date().toISOString().split('T')[0]
+    toLocalDateStr(new Date()) || new Date().toISOString().split('T')[0]
   );
+  const [showAllDates, setShowAllDates] = useState<boolean>(false);
 
   const [appointments, setAppointments] = useState<any[]>([]);
   const [professionals, setProfessionals] = useState<any[]>([]);
@@ -53,13 +55,14 @@ export const AdminPage: React.FC = () => {
     if (isAuthenticated) {
       loadData();
     }
-  }, [isAuthenticated, selectedDate]);
+  }, [isAuthenticated, selectedDate, showAllDates]);
 
   const loadData = async () => {
     setLoading(true);
     try {
+      const queryDate = showAllDates ? 'all' : selectedDate;
       const [appts, pros] = await Promise.all([
-        fetchAppointmentsForDate(selectedDate),
+        fetchAppointmentsForDate(queryDate),
         fetchProfessionals(),
       ]);
       setAppointments(appts);
@@ -218,7 +221,7 @@ export const AdminPage: React.FC = () => {
       <main className="p-4 sm:p-8 max-w-7xl mx-auto space-y-8">
         {/* Controls Bar: Date Filter & View Switcher */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 bg-black border border-white/10">
-          <div className="flex items-center gap-3 w-full sm:w-auto">
+          <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
             <Calendar className="text-[#5E308A]" size={20} />
             <label className="text-xs font-black uppercase text-[#F2EAD9]">
               DATA DA AGENDA:
@@ -226,9 +229,22 @@ export const AdminPage: React.FC = () => {
             <input
               type="date"
               value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
+              onChange={(e) => {
+                setSelectedDate(e.target.value);
+                setShowAllDates(false);
+              }}
               className="py-2 px-3 bg-white/10 border border-white/20 text-white text-xs font-black outline-none focus:border-[#5E308A]"
             />
+            <button
+              onClick={() => setShowAllDates(!showAllDates)}
+              className={`px-3 py-2 text-xs font-black uppercase border transition-all ${
+                showAllDates
+                  ? 'bg-[#5E308A] text-white border-[#9D4EDD]'
+                  : 'bg-white/5 text-white/70 border-white/20 hover:bg-white/10'
+              }`}
+            >
+              {showAllDates ? '★ EXIBINDO TODAS AS DATAS' : 'VER TODAS AS DATAS'}
+            </button>
           </div>
 
           {/* View Switcher Buttons */}

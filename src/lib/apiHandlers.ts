@@ -20,8 +20,12 @@ export const defaultServices = [
   { id: 'srv-7', name: 'Limpeza de Pele & Cuidado Facial', category: 'estetica', durationMin: 30, price: 70.0, description: 'Remoção de cravos, esfoliação e hidratação profunda.' },
 ];
 
-export function toLocalDateStr(dateInput: Date | string): string {
-  const date = typeof dateInput === 'string' ? new Date(dateInput) : dateInput;
+export function toLocalDateStr(dateInput: Date | string | number): string {
+  if (!dateInput) return '';
+  if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+    return dateInput;
+  }
+  const date = typeof dateInput === 'string' || typeof dateInput === 'number' ? new Date(dateInput) : dateInput;
   if (isNaN(date.getTime())) return '';
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -138,29 +142,37 @@ export async function createAppointment(payload: CreateAppointmentPayload) {
 export async function fetchAppointmentsForDate(dateStr: string) {
   let dbAppts: any[] = [];
   try {
-    const targetDate = new Date(`${dateStr}T00:00:00`);
-    const startOfDay = new Date(targetDate);
-    startOfDay.setHours(0, 0, 0, 0);
+    if (dateStr === 'all' || !dateStr) {
+      dbAppts = await prisma.appointment.findMany({
+        include: { service: true, professional: true },
+        orderBy: { startTime: 'asc' },
+      });
+    } else {
+      const targetDate = new Date(`${dateStr}T00:00:00`);
+      const startOfDay = new Date(targetDate);
+      startOfDay.setHours(0, 0, 0, 0);
 
-    const endOfDay = new Date(targetDate);
-    endOfDay.setHours(23, 59, 59, 999);
+      const endOfDay = new Date(targetDate);
+      endOfDay.setHours(23, 59, 59, 999);
 
-    dbAppts = await prisma.appointment.findMany({
-      where: {
-        startTime: { gte: startOfDay, lte: endOfDay },
-      },
-      include: {
-        service: true,
-        professional: true,
-      },
-      orderBy: { startTime: 'asc' },
-    });
+      dbAppts = await prisma.appointment.findMany({
+        where: {
+          startTime: { gte: startOfDay, lte: endOfDay },
+        },
+        include: {
+          service: true,
+          professional: true,
+        },
+        orderBy: { startTime: 'asc' },
+      });
+    }
   } catch {
     dbAppts = [];
   }
 
-  // Merge with LocalStorage appointments matching local YYYY-MM-DD
+  // Merge with LocalStorage appointments
   const localAppts = getLocalAppointments().filter((a) => {
+    if (dateStr === 'all' || !dateStr) return true;
     const apptDateStr = toLocalDateStr(a.startTime);
     return apptDateStr === dateStr;
   });
@@ -233,7 +245,7 @@ export interface UpdateAppointmentPayload {
   clientNotes?: string;
   serviceId: string;
   professionalId: string;
-  startTime: string; // ISO String
+  startTime: string; // ISO String;
   durationMin: number;
   status: string;
 }
