@@ -37,7 +37,27 @@ export function getLocalAppointments(): any[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem('hypecut_appointments');
-    return raw ? JSON.parse(raw) : [];
+    if (!raw) {
+      const initial = [
+        {
+          id: 'appt-demo-1',
+          clientName: 'Murilo Freitas',
+          clientPhone: '47988623836',
+          clientNotes: 'Corte VIP com barboterapia',
+          startTime: new Date().toISOString(),
+          endTime: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+          status: 'CONFIRMED',
+          serviceId: 'srv-3',
+          professionalId: 'pro-1',
+          service: defaultServices[2],
+          professional: defaultProfessionals[0],
+          createdAt: new Date().toISOString(),
+        },
+      ];
+      localStorage.setItem('hypecut_appointments', JSON.stringify(initial));
+      return initial;
+    }
+    return JSON.parse(raw);
   } catch {
     return [];
   }
@@ -90,13 +110,10 @@ export interface CreateAppointmentPayload {
 
 export async function createAppointment(payload: CreateAppointmentPayload) {
   const start = new Date(payload.startTime);
-  const end = new Date(start.getTime() + payload.durationMin * 60 * 1000);
+  const end = new Date(start.getTime() + (payload.durationMin || 30) * 60 * 1000);
 
-  const allServices = await fetchServices();
-  const allPros = await fetchProfessionals();
-
-  const selectedService = allServices.find((s) => s.id === payload.serviceId || s.name === payload.serviceId) || defaultServices[0];
-  const selectedPro = allPros.find((p) => p.id === payload.professionalId || p.name === payload.professionalId) || defaultProfessionals[0];
+  const selectedService = defaultServices.find((s) => s.id === payload.serviceId || s.name === payload.serviceId) || defaultServices[0];
+  const selectedPro = defaultProfessionals.find((p) => p.id === payload.professionalId || p.name === payload.professionalId) || defaultProfessionals[0];
 
   const newAppt = {
     id: 'appt-' + Math.random().toString(36).substring(2, 9),
@@ -113,13 +130,13 @@ export async function createAppointment(payload: CreateAppointmentPayload) {
     createdAt: new Date().toISOString(),
   };
 
-  // 1. Save to LocalStorage immediately for instant SPA UI update
+  // 1. Save to LocalStorage immediately & synchronously
   const localList = getLocalAppointments();
   saveLocalAppointments([newAppt, ...localList]);
 
-  // 2. Try DB in background
+  // 2. Try DB in background without blocking
   try {
-    await prisma.appointment.create({
+    prisma.appointment.create({
       data: {
         id: newAppt.id,
         clientName: payload.clientName,
@@ -131,7 +148,7 @@ export async function createAppointment(payload: CreateAppointmentPayload) {
         serviceId: selectedService.id,
         professionalId: selectedPro.id,
       },
-    });
+    }).catch((err) => console.warn('DB async insert fallback:', err));
   } catch (err) {
     console.warn('DB creation fallback to local storage:', err);
   }
@@ -197,13 +214,13 @@ export async function updateAppointmentStatus(appointmentId: string, newStatus: 
 
   // Update DB in background
   try {
-    await prisma.appointment.update({
+    prisma.appointment.update({
       where: { id: appointmentId },
       data: {
         status: newStatus,
         ...(cancelReason ? { cancelReason } : {}),
       },
-    });
+    }).catch((err) => console.warn('DB async status update fallback:', err));
   } catch (err) {
     console.warn('DB status update fallback:', err);
   }
@@ -212,7 +229,8 @@ export async function updateAppointmentStatus(appointmentId: string, newStatus: 
 }
 
 export async function findAppointmentsByPhone(phoneDigits: string) {
-  const cleanPhone = phoneDigits.replace(/\D/g, '');
+  const searchClean = phoneDigits.replace(/\D/g, '');
+  if (!searchClean) return [];
 
   let dbAppts: any[] = [];
   try {
@@ -235,7 +253,19 @@ export async function findAppointmentsByPhone(phoneDigits: string) {
   });
 
   const allMerged = Array.from(mergedMap.values());
-  return allMerged.filter((a) => (a.clientPhone || '').replace(/\D/g, '').includes(cleanPhone));
+
+  return allMerged.filter((a) => {
+    if (!a.clientPhone) return false;
+    const targetClean = a.clientPhone.replace(/\D/g, '');
+    if (!targetClean) return false;
+
+    const isExactMatch = targetClean.includes(searchClean) || searchClean.includes(targetClean);
+    const last8Search = searchClean.slice(-8);
+    const last8Target = targetClean.slice(-8);
+    const isSuffixMatch = last8Search.length >= 8 && last8Target.length >= 8 && last8Search === last8Target;
+
+    return isExactMatch || isSuffixMatch;
+  });
 }
 
 export interface UpdateAppointmentPayload {
@@ -245,7 +275,7 @@ export interface UpdateAppointmentPayload {
   clientNotes?: string;
   serviceId: string;
   professionalId: string;
-  startTime: string; // ISO String;
+  startTime: string; // ISO String
   durationMin: number;
   status: string;
 }
@@ -254,11 +284,8 @@ export async function updateFullAppointment(payload: UpdateAppointmentPayload) {
   const start = new Date(payload.startTime);
   const end = new Date(start.getTime() + payload.durationMin * 60 * 1000);
 
-  const allServices = await fetchServices();
-  const allPros = await fetchProfessionals();
-
-  const selectedService = allServices.find((s) => s.id === payload.serviceId) || defaultServices[0];
-  const selectedPro = allPros.find((p) => p.id === payload.professionalId) || defaultProfessionals[0];
+  const selectedService = defaultServices.find((s) => s.id === payload.serviceId) || defaultServices[0];
+  const selectedPro = defaultProfessionals.find((p) => p.id === payload.professionalId) || defaultProfessionals[0];
 
   const updatedObj = {
     ...payload,
@@ -274,7 +301,7 @@ export async function updateFullAppointment(payload: UpdateAppointmentPayload) {
 
   // Update DB in background
   try {
-    await prisma.appointment.update({
+    prisma.appointment.update({
       where: { id: payload.id },
       data: {
         clientName: payload.clientName,
@@ -286,7 +313,7 @@ export async function updateFullAppointment(payload: UpdateAppointmentPayload) {
         endTime: end,
         status: payload.status,
       },
-    });
+    }).catch((err) => console.warn('DB async update full appt fallback:', err));
   } catch (err) {
     console.warn('Fallback update full appointment:', err);
   }
