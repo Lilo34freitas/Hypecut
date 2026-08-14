@@ -73,12 +73,12 @@ export const ParallaxHero = () => {
         </motion.div>
       </div>
 
-      {/* Floating Contact Card for Hero */}
+      {/* Floating Contact Card for Hero (Exibido apenas em telas/monitores ultra-wide de 21+ polegadas - 1920px+) */}
       <motion.div 
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.8, duration: 0.8 }}
-        className="absolute bottom-0 right-0 lg:right-[5%] z-30 bg-nav-bg p-8 md:p-12 lg:p-14 w-full md:w-[550px] lg:w-[600px] h-[320px] md:h-[380px] lg:h-[400px] flex flex-col justify-end shadow-[0_-10px_30px_rgba(0,0,0,0.15)] hidden md:block"
+        className="absolute bottom-0 right-0 min-[1920px]:right-[5%] z-30 bg-nav-bg p-8 md:p-12 lg:p-14 w-full md:w-[550px] lg:w-[600px] h-[320px] md:h-[380px] lg:h-[400px] flex-col justify-end shadow-[0_-10px_30px_rgba(0,0,0,0.15)] hidden min-[1920px]:flex"
       >
         <h3 className="text-4xl lg:text-5xl font-black text-nav-text mb-6 tracking-tight">(47) 99959-5843</h3>
         <p className="text-lg lg:text-xl font-medium text-nav-text/90 mb-3">Segunda-feira das 14h às 20h</p>
