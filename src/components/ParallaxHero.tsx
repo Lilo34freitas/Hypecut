@@ -1,34 +1,10 @@
-import { useRef, useState, useEffect } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { ButtonAgendar } from './ui/ButtonAgendar';
 import { BlurText } from './ui/BlurText';
 
 export const ParallaxHero = () => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-  
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start start", "end start"]
-  });
-
-  // Parallax effects (Active exclusively on desktop for ultra-smooth 120Hz native mobile scrolling)
-  const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
-  const yText = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
-
   return (
     <div 
-      ref={ref}
       id="inicio"
       className="relative min-h-[100dvh] h-[100dvh] w-full flex items-center overflow-hidden bg-bg-darkest"
     >
@@ -36,10 +12,7 @@ export const ParallaxHero = () => {
       <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#5E308A] to-transparent z-40 shadow-[0_0_15px_rgba(94,48,138,0.9)]" />
 
       {/* Background Video / Image - High Luminosity & Vibrant Visibility */}
-      <motion.div 
-        className="absolute inset-0 z-0 opacity-85"
-        style={isMobile ? undefined : { y: yBg }}
-      >
+      <div className="absolute inset-0 z-0 opacity-85">
         {/* Soft Radial Vignette + Left Reading Gradient (Clear Center Action) */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#0B0908]/80 via-transparent to-[#0B0908]/40 z-10" />
         <div className="absolute inset-0 bg-gradient-to-t from-bg-darkest/90 via-transparent to-black/25 z-10" />
@@ -63,13 +36,12 @@ export const ParallaxHero = () => {
         >
           <source src="/SaveInta.com_AQMOscq4sfh22n2o0SFxu3bN1IkABNfyxTt16iOoF0IamHbXzDeH_Pbdi3adOoAcKvaJgEqP9NNfY_PraFGMu0vGJvc60o8hMCMUmtk.mp4" type="video/mp4" />
         </video>
-      </motion.div>
+      </div>
 
-      {/* Content with Enhanced Staggered Entrance Animation */}
+      {/* Content with Fixed Position relative to Hero container */}
       <div className="relative z-20 w-full px-6 md:px-12 lg:px-20 flex flex-col justify-end items-start h-full pt-20 pb-12 md:pb-16 lg:pb-12 xl:pb-14">
         <motion.div 
-          style={isMobile ? undefined : { y: yText, opacity }}
-          initial={isMobile ? false : { opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-[1200px] flex flex-col items-start"
