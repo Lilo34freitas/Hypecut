@@ -54,8 +54,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       await loginWithCredentials(emailOrPhone, loginPassword);
       if (onSuccess) onSuccess();
       onClose();
-    } catch (e) {
-      setErrorMsg('Erro ao realizar login.');
+    } catch (e: any) {
+      setErrorMsg(e?.message || 'Erro ao realizar login.');
     } finally {
       setLoading(false);
     }
@@ -79,8 +79,8 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose, onSuccess
       });
       if (onSuccess) onSuccess();
       onClose();
-    } catch (e) {
-      setErrorMsg('Erro ao cadastrar usuário.');
+    } catch (e: any) {
+      setErrorMsg(e?.message || 'Erro ao cadastrar usuário.');
     } finally {
       setLoading(false);
     }

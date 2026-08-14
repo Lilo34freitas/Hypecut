@@ -219,14 +219,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginWithCredentials = async (emailOrPhone: string, password?: string): Promise<UserAccount> => {
     const cleanSearch = emailOrPhone.trim().toLowerCase();
 
-    // Supabase Auth Login
-    if (isSupabaseConfigured && cleanSearch.includes('@') && password) {
+    if (!password || password.trim() === '') {
+      throw new Error('Por favor, informe sua senha.');
+    }
+
+    if (!cleanSearch.includes('@')) {
+      throw new Error('Por favor, informe um e-mail válido para entrar.');
+    }
+
+    // Supabase Auth Login with strict validation
+    if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: cleanSearch,
         password,
       });
 
       if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes('invalid login credentials') || msg.includes('invalid grant') || msg.includes('user not found')) {
+          throw new Error('E-mail não cadastrado ou senha incorreta.');
+        }
+        if (msg.includes('email not confirmed')) {
+          throw new Error('E-mail pendente de confirmação. Verifique sua caixa de entrada.');
+        }
         throw new Error(error.message || 'Credenciais inválidas.');
       }
 
@@ -248,21 +263,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Local / Dev Fallback: Secure Session without saving plaintext password
-    const isEmail = cleanSearch.includes('@');
-    const account: UserAccount = {
-      id: 'usr-' + Math.random().toString(36).substring(2, 9),
-      name: isEmail ? cleanSearch.split('@')[0] : 'Cliente',
-      surname: '',
-      email: isEmail ? cleanSearch : `${cleanSearch.replace(/\D/g, '')}@hypecut.com`,
-      phone: isEmail ? '47999998888' : cleanSearch,
-      role: 'CLIENT',
-      provider: 'local',
-      createdAt: new Date().toISOString(),
-    };
-
-    saveActiveUser(account);
-    return account;
+    throw new Error('Serviço de autenticação temporariamente indisponível.');
   };
 
   const loginAdmin = async (email: string, password: string): Promise<UserAccount> => {
@@ -274,7 +275,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        throw new Error(error.message || 'E-mail ou senha incorretos.');
+        throw new Error('E-mail ou senha de administrador incorretos.');
       }
 
       if (data.user) {
@@ -300,14 +301,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    throw new Error('Supabase não configurado para autenticação administrativa segura.');
+    throw new Error('Supabase não configurado para autenticação administrativa.');
   };
 
   const registerUser = async (payload: RegisterPayload): Promise<UserAccount> => {
     const cleanEmail = payload.email.trim().toLowerCase();
 
+    if (!payload.password || payload.password.length < 6) {
+      throw new Error('A senha deve ter no mínimo 6 caracteres.');
+    }
+
     // Supabase Auth Registration with Bcrypt server-side hashing
-    if (isSupabaseConfigured && payload.password) {
+    if (isSupabaseConfigured) {
       const { data, error } = await supabase.auth.signUp({
         email: cleanEmail,
         password: payload.password,
@@ -322,6 +327,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
+        const msg = error.message.toLowerCase();
+        if (msg.includes('already registered') || msg.includes('unique constraint')) {
+          throw new Error('Este e-mail já está cadastrado. Acesse a aba "Entrar" com sua senha.');
+        }
         throw new Error(error.message || 'Erro ao cadastrar usuário.');
       }
 
@@ -341,20 +350,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     }
 
-    // Local / Dev Fallback
-    const account: UserAccount = {
-      id: 'usr-' + Math.random().toString(36).substring(2, 9),
-      name: payload.name.trim(),
-      surname: payload.surname.trim(),
-      email: cleanEmail,
-      phone: payload.phone.trim(),
-      role: 'CLIENT',
-      provider: 'local',
-      createdAt: new Date().toISOString(),
-    };
-
-    saveActiveUser(account);
-    return account;
+    throw new Error('Serviço de cadastro indisponível no momento.');
   };
 
   const logout = async () => {
