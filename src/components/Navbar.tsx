@@ -1,14 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, ChevronDown, Calendar } from 'lucide-react';
+import { Menu, X, ChevronDown, Calendar, User as UserIcon, LogOut } from 'lucide-react';
 import { cn } from '../utils/cn';
 import { ContactModal } from './ui/ContactModal';
+import { AuthModal } from './ui/AuthModal';
+import { useAuth } from '../context/AuthContext';
 
 export const Navbar = () => {
+  const { user, isAuthenticated, logout } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const location = useLocation();
 
   const isAboutPage = location.pathname === '/sobre';
@@ -27,16 +32,6 @@ export const Navbar = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [location.pathname]);
-
-  const handleSectionClick = (e: React.MouseEvent<HTMLAnchorElement>, sectionId: string) => {
-    if (location.pathname === '/') {
-      e.preventDefault();
-      const element = document.getElementById(sectionId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }
-  };
 
   // On subpages (/servicos, /tattoo), navbar is permanently compact. On home & /sobre, it responds to scroll.
   const effectiveScrolled = isFixedCompactPage || (isAboutPage ? isScrolled : isScrolled);
@@ -98,36 +93,30 @@ export const Navbar = () => {
               Sobre
             </a>
 
-            {/* Dropdown Services */}
-            <div className="relative group cursor-pointer">
-              <a 
-                href="/servicos" 
+            {/* Dropdown Services (Trigger does not navigate, only subitems do) */}
+            <div className="relative group cursor-pointer py-2">
+              <button 
+                type="button"
                 className={cn(
-                  "font-bold tracking-wider text-nav-text group-hover:text-text-accent transition-all duration-500 uppercase flex items-center gap-1",
+                  "font-bold tracking-wider text-nav-text group-hover:text-text-accent transition-all duration-500 uppercase flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 outline-none",
                   effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.8rem]" : "text-[0.75rem] md:text-[0.78rem] xl:text-[1rem]",
-                  location.pathname === '/servicos' && "text-text-accent"
+                  location.pathname.startsWith('/servicos') && "text-text-accent"
                 )}
               >
-                Serviços <ChevronDown size={effectiveScrolled ? 13 : 16} className="transition-all duration-500" />
-              </a>
-              <div className="absolute top-full left-0 mt-4 w-52 bg-nav-bg border border-surface-border rounded-none shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 flex flex-col py-2 z-[10000]">
-                <a href="/servicos?categoria=masculino" className="px-4 py-2.5 text-[0.8rem] font-bold text-nav-text hover:bg-black/5 hover:text-text-accent uppercase tracking-wider transition-colors">Masculino</a>
-                <a href="/servicos?categoria=feminino" className="px-4 py-2.5 text-[0.8rem] font-bold text-nav-text hover:bg-black/5 hover:text-text-accent uppercase tracking-wider transition-colors">Femininos</a>
-                <a href="/servicos?categoria=tattoo" className="px-4 py-2.5 text-[0.8rem] font-bold text-nav-text hover:bg-black/5 hover:text-text-accent uppercase tracking-wider transition-colors">Tattoos</a>
-                <a href="/servicos" className="px-4 py-2.5 text-[0.8rem] font-black text-text-accent hover:bg-black/5 uppercase tracking-wider border-t border-black/10 transition-colors">Todos os serviços</a>
+                <span>Serviços</span>
+                <ChevronDown size={effectiveScrolled ? 13 : 16} className="transition-transform duration-300 group-hover:rotate-180" />
+              </button>
+              
+              {/* Dropdown Menu with padding bridge to prevent accidental closure */}
+              <div className="absolute top-full left-0 pt-2 w-52 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-[10000]">
+                <div className="bg-nav-bg border border-surface-border rounded-none shadow-xl flex flex-col py-2">
+                  <a href="/servicos?categoria=masculino" className="px-4 py-2.5 text-[0.8rem] font-bold text-nav-text hover:bg-black/5 hover:text-text-accent uppercase tracking-wider transition-colors">Masculino</a>
+                  <a href="/servicos?categoria=feminino" className="px-4 py-2.5 text-[0.8rem] font-bold text-nav-text hover:bg-black/5 hover:text-text-accent uppercase tracking-wider transition-colors">Femininos</a>
+                  <a href="/servicos?categoria=tattoo" className="px-4 py-2.5 text-[0.8rem] font-bold text-nav-text hover:bg-black/5 hover:text-text-accent uppercase tracking-wider transition-colors">Tattoos</a>
+                  <a href="/servicos" className="px-4 py-2.5 text-[0.8rem] font-black text-text-accent hover:bg-black/5 uppercase tracking-wider border-t border-black/10 transition-colors">Todos os serviços</a>
+                </div>
               </div>
             </div>
-
-            <a 
-              href="/#informacoes" 
-              onClick={(e) => handleSectionClick(e, 'informacoes')}
-              className={cn(
-                "font-bold tracking-wider text-nav-text hover:text-text-accent transition-all duration-500 uppercase",
-                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.8rem]" : "text-[0.75rem] md:text-[0.78rem] xl:text-[1rem]"
-              )}
-            >
-              Informações
-            </a>
 
             <a 
               href="/tattoo" 
@@ -150,25 +139,73 @@ export const Navbar = () => {
               Contato
             </button>
 
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('open-manage-modal'))}
-              className={cn(
-                "font-bold tracking-wider text-[#5E308A] hover:underline transition-all duration-500 uppercase cursor-pointer whitespace-nowrap",
-                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.8rem]" : "text-[0.75rem] md:text-[0.78rem] xl:text-[0.9rem]"
-              )}
-            >
-              Meus Agendamentos
-            </button>
+            {/* USER ACCOUNT CHIP / LOGIN TRIGGER */}
+            {isAuthenticated && user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-[#5E308A]/10 border border-[#5E308A]/30 text-[#5E308A] hover:bg-[#5E308A]/20 transition-all font-extrabold text-[0.72rem] uppercase tracking-wider cursor-pointer"
+                >
+                  {user.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user.name} className="w-5 h-5 rounded-full object-cover" />
+                  ) : (
+                    <UserIcon size={14} />
+                  )}
+                  <span>{user.name.split(' ')[0]}</span>
+                  <ChevronDown size={13} />
+                </button>
 
-            {/* CTA AGENDAR Button on Far Right */}
+                {isUserDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-48 bg-[#0F0F12] border border-[#F2EAD9]/20 shadow-2xl flex flex-col py-2 z-[10000] text-[#F2EAD9]">
+                    <div className="px-4 py-2 border-b border-[#F2EAD9]/10">
+                      <p className="text-[11px] font-bold uppercase truncate">{user.name} {user.surname}</p>
+                      <p className="text-[9px] text-[#F2EAD9]/50 truncate">{user.email}</p>
+                    </div>
+                    <button
+                      onClick={() => {
+                        setIsUserDropdownOpen(false);
+                        window.dispatchEvent(new CustomEvent('open-manage-modal'));
+                      }}
+                      className="px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-left hover:bg-white/10 flex items-center gap-2 cursor-pointer"
+                    >
+                      <Calendar size={14} className="text-[#5E308A]" />
+                      <span>Meus Agendamentos</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsUserDropdownOpen(false);
+                        logout();
+                      }}
+                      className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-left hover:bg-red-500/20 text-red-400 flex items-center gap-2 cursor-pointer border-t border-[#F2EAD9]/10"
+                    >
+                      <LogOut size={14} />
+                      <span>Sair da Conta</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => setIsAuthModalOpen(true)}
+                className={cn(
+                  "font-bold tracking-wider text-[#0B0908]/75 hover:text-[#5E308A] hover:bg-[#5E308A]/10 px-3 py-1.5 border border-[#0B0908]/15 hover:border-[#5E308A]/30 rounded-none transition-all duration-300 uppercase cursor-pointer whitespace-nowrap flex items-center gap-1.5",
+                  effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.78rem]" : "text-[0.74rem] md:text-[0.78rem] xl:text-[0.84rem]"
+                )}
+              >
+                <UserIcon size={14} className="text-[#5E308A]" />
+                <span>Minha Conta</span>
+              </button>
+            )}
+
+            {/* CTA AGENDAR Button on Far Right - Prominent Primary Action */}
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('open-booking-modal'))}
               className={cn(
-                "Btn-purple shrink-0 ml-1.5 sm:ml-3 whitespace-nowrap cursor-pointer shadow-md",
-                effectiveScrolled ? "!h-9 !px-3 md:!px-4 text-[0.72rem]" : "!h-10 md:!h-11 !px-4 md:!px-6 text-[0.78rem] md:text-[0.85rem]"
+                "Btn-purple shrink-0 ml-2 sm:ml-4 whitespace-nowrap cursor-pointer shadow-[0_4px_16px_rgba(94,48,138,0.4)] hover:shadow-[0_6px_25px_rgba(94,48,138,0.65)] hover:scale-[1.02] active:scale-95 transition-all",
+                effectiveScrolled ? "!h-10 !px-4 md:!px-5 text-[0.76rem]" : "!h-11 md:!h-12 !px-5 md:!px-7 text-[0.82rem] md:text-[0.9rem]"
               )}
             >
-              <Calendar size={effectiveScrolled ? 14 : 16} />
+              <Calendar size={effectiveScrolled ? 15 : 18} />
               <span>AGENDAR HORÁRIO</span>
             </button>
           </div>
@@ -196,7 +233,41 @@ export const Navbar = () => {
               <a href="/sobre" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-bold uppercase tracking-wider text-[#F2EAD9]">Sobre</a>
               <a href="/servicos" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-bold uppercase tracking-wider text-[#F2EAD9]">Serviços</a>
               <a href="/tattoo" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-bold uppercase tracking-wider text-[#F2EAD9]">Tattoos</a>
-              <a href="/#informacoes" onClick={() => setIsMobileMenuOpen(false)} className="text-base font-bold uppercase tracking-wider text-[#F2EAD9]">Informações</a>
+
+              {isAuthenticated && user ? (
+                <div className="pt-2 border-t border-white/10 space-y-2">
+                  <p className="text-xs font-bold text-[#5E308A] uppercase">Logado como: {user.name}</p>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      window.dispatchEvent(new CustomEvent('open-manage-modal'));
+                    }}
+                    className="text-base font-bold uppercase tracking-wider text-[#F2EAD9] text-left cursor-pointer"
+                  >
+                    Meus Agendamentos
+                  </button>
+                  <button
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      logout();
+                    }}
+                    className="text-sm font-bold uppercase text-red-400 text-left cursor-pointer block"
+                  >
+                    Sair da Conta
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setIsAuthModalOpen(true);
+                  }}
+                  className="text-base font-bold uppercase tracking-wider text-[#5E308A] text-left cursor-pointer"
+                >
+                  Minha Conta / Entrar
+                </button>
+              )}
+
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
@@ -225,6 +296,12 @@ export const Navbar = () => {
       <ContactModal
         isOpen={isContactModalOpen}
         onClose={() => setIsContactModalOpen(false)}
+      />
+
+      {/* Auth Modal Popup */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
       />
     </>
   );

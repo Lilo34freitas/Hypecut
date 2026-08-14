@@ -388,3 +388,22 @@
     100% { fill: white; }
   }
 }
+
+/* Custom Dark Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0F0F12;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5E308A;
+  border-radius: 0px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6C3DFF;
+}

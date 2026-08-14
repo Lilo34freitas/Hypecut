@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BlurText } from '../ui/BlurText';
 
 interface Combo {
   tag: string;
@@ -96,7 +97,7 @@ export const SubscriptionsSection = () => {
       {/* Right-Aligned Section Header */}
       <div className="w-full px-6 md:px-12 lg:px-16 max-w-[1700px] mx-auto mb-12 md:mb-16 text-right flex flex-col items-end">
         <h2 className="text-4xl md:text-6xl lg:text-7xl font-black uppercase text-[#F2EAD9] tracking-tight leading-none mb-3">
-          COMBOS <span className="text-[#F2EAD9]">HYPECUT</span>
+          <BlurText text="COMBOS HYPECUT" delay={90} animateBy="words" direction="top" />
         </h2>
         <p className="text-[#F2EAD9]/80 text-xs md:text-sm font-bold uppercase tracking-wider max-w-2xl">
           A melhor combinação de serviços para renovar seu visual em uma única sessão.

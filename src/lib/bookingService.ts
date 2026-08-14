@@ -1,4 +1,4 @@
-import { prisma } from './prisma';
+import { supabase, isSupabaseConfigured } from './supabase';
 
 export interface TimeSlot {
   time: string; // "14:00"
@@ -10,7 +10,6 @@ export interface TimeSlot {
 /**
  * Gets business working hours for a given Day of Week (0 = Sun, 1 = Mon, ..., 6 = Sat)
  */
-
 export function getBusinessHours(dayOfWeek: number): { openHour: number; openMin: number; closeHour: number; closeMin: number } | null {
   switch (dayOfWeek) {
     case 1: // Monday: 14:00 - 20:00
@@ -56,18 +55,29 @@ export async function getAvailabilityForDate(
 
   // Fetch existing appointments for professional on target date (CONFIRMED or PENDING)
   let dbAppts: Array<{ startTime: Date; endTime: Date }> = [];
-  try {
-    const appointments = await prisma.appointment.findMany({
-      where: {
-        ...(professionalId !== 'any' ? { professionalId } : {}),
-        status: { in: ['CONFIRMED', 'PENDING'] },
-        startTime: { gte: startOfDay, lt: endOfDay },
-      },
-      select: { startTime: true, endTime: true },
-    });
-    dbAppts = appointments;
-  } catch (err) {
-    console.warn('Fallback: DB not connected, returning mock availability slots.', err);
+  if (isSupabaseConfigured) {
+    try {
+      let query = supabase
+        .from('appointments')
+        .select('start_time, end_time')
+        .in('status', ['CONFIRMED', 'PENDING'])
+        .gte('start_time', startOfDay.toISOString())
+        .lt('start_time', endOfDay.toISOString());
+
+      if (professionalId && professionalId !== 'any') {
+        query = query.eq('professional_id', professionalId);
+      }
+
+      const { data, error } = await query;
+      if (!error && data) {
+        dbAppts = data.map((item: any) => ({
+          startTime: new Date(item.start_time),
+          endTime: new Date(item.end_time),
+        }));
+      }
+    } catch (err) {
+      console.warn('Fallback: Supabase fetch error, fallback to local storage.', err);
+    }
   }
 
   // Merge local storage appointments

@@ -4,6 +4,7 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/sections/Footer';
 import { ArrowRight, MessageSquare, Clock, Play, User, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, X } from 'lucide-react';
 import { CursorGrid } from '../components/ui/CursorGrid';
+import { BlurText } from '../components/ui/BlurText';
 
 interface FlashTattoo {
   id: number;
@@ -458,7 +459,7 @@ const ArtistCarousel = ({
 };
 
 export const TattooPage = () => {
-  const [visibleCount, setVisibleCount] = useState(6);
+  const [isGalleryExpanded, setIsGalleryExpanded] = useState(false);
   const [selectedTattoo, setSelectedTattoo] = useState<FlashTattoo | null>(null);
   const galeriaRef = useRef<HTMLDivElement>(null);
 
@@ -484,19 +485,17 @@ export const TattooPage = () => {
   const brunoItems = flashCatalog.filter((item) => item.artist === 'BRUNO');
   const matheusItems = flashCatalog.filter((item) => item.artist === 'MATHEUS');
 
-  const visibleGalleryItems = flashCatalog.slice(0, visibleCount);
-  const hasMoreItems = visibleCount < flashCatalog.length;
-
-  const toggleVisibleCount = () => {
-    if (hasMoreItems) {
-      setVisibleCount(flashCatalog.length);
+  const toggleGallery = () => {
+    if (!isGalleryExpanded) {
+      setIsGalleryExpanded(true);
     } else {
+      setIsGalleryExpanded(false);
+      // Smoothly scroll to gallery section header
       if (galeriaRef.current) {
-        galeriaRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const yOffset = -120;
+        const y = galeriaRef.current.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
       }
-      setTimeout(() => {
-        setVisibleCount(6);
-      }, 150);
     }
   };
 
@@ -517,7 +516,7 @@ export const TattooPage = () => {
         {/* Page Header Hero */}
         <div className="mb-16 border-b border-white/10 pb-12">
           <h1 className="text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black uppercase text-[#F2EAD9] tracking-tight leading-none mb-6">
-            TATTOO
+            <BlurText text="TATTOO" delay={90} animateBy="letters" direction="top" />
           </h1>
 
           <p className="text-[#F2EAD9]/80 text-sm md:text-base font-bold uppercase tracking-wider max-w-3xl leading-relaxed">
@@ -632,17 +631,19 @@ export const TattooPage = () => {
             </h2>
           </div>
 
-          {/* Galeria Grid with Smooth AnimatePresence Layout Transitions */}
-          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <AnimatePresence>
-              {visibleGalleryItems.map((item) => (
-                <motion.div
+          {/* Galeria Container with Buttery-Smooth Height Transition (Zero Cut / Zero Recoil) */}
+          <div 
+            className={`relative overflow-hidden transition-[max-height] duration-700 ease-in-out ${
+              isGalleryExpanded 
+                ? 'max-h-[8500px]' 
+                : 'max-h-[2600px] md:max-h-[1900px] lg:max-h-[1280px]'
+            }`}
+          >
+            {/* Galeria Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-4">
+              {flashCatalog.map((item) => (
+                <div
                   key={item.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.94, y: 25 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.94, y: 20 }}
-                  transition={{ duration: 0.45, ease: [0.25, 1, 0.5, 1] }}
                   onClick={() => setSelectedTattoo(item)}
                   className="bg-black border-2 border-white/10 hover:border-[#5E308A] rounded-none shadow-2xl flex flex-col justify-between overflow-hidden transition-all duration-300 group cursor-pointer"
                 >
@@ -656,9 +657,10 @@ export const TattooPage = () => {
                           loop
                           muted
                           playsInline
+                          preload="metadata"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
                         />
-                        <div className="absolute top-3 right-3 bg-[#5E308A] text-[#F2EAD9] px-2.5 py-1 rounded-none text-[10px] font-black uppercase flex items-center gap-1 shadow-md z-10">
+                        <div className="absolute top-3 right-3 bg-[#5E308A] text-[#F2EAD9] px-2.5 py-1 rounded-none text-[10px] font-black uppercase flex items-center gap-1 shadow-md z-10 pointer-events-none">
                           <Play size={10} fill="#F2EAD9" />
                           <span>VÍDEO REAL</span>
                         </div>
@@ -667,13 +669,14 @@ export const TattooPage = () => {
                       <img
                         src={item.mediaUrl}
                         alt={item.title}
+                        loading="lazy"
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
                       />
                     )}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80 pointer-events-none" />
 
                     {/* Artist Tag Overlay */}
-                    <div className="absolute bottom-3 left-3 bg-black/90 border border-white/20 text-[#F2EAD9] px-2.5 py-1 rounded-none text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg z-10">
+                    <div className="absolute bottom-3 left-3 bg-black/90 border border-white/20 text-[#F2EAD9] px-2.5 py-1 rounded-none text-[10px] font-black uppercase tracking-wider flex items-center gap-1.5 shadow-lg z-10 pointer-events-none">
                       <User size={12} className="text-[#5E308A]" />
                       <span>POR {item.artist}</span>
                     </div>
@@ -723,21 +726,26 @@ export const TattooPage = () => {
                       </button>
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
-            </AnimatePresence>
-          </motion.div>
+            </div>
+
+            {/* Smooth Ambient Bottom Gradient Overlay when Collapsed */}
+            {!isGalleryExpanded && (
+              <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-44 bg-gradient-to-t from-[#0B0908] via-[#0B0908]/90 to-transparent z-10 transition-opacity duration-500" />
+            )}
+          </div>
 
           {/* VER MAIS / VER MENOS BUTTON */}
-          <div className="mt-12 text-center">
+          <div className="mt-12 text-center relative z-20">
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={toggleVisibleCount}
+              onClick={toggleGallery}
               className="Btn-purple font-black text-xs md:text-sm uppercase tracking-widest inline-flex items-center gap-3 cursor-pointer shadow-xl border border-white/10"
             >
-              <span>{hasMoreItems ? `VER MAIS TRABALHOS (${flashCatalog.length - visibleCount} RESTANTES)` : 'VER MENOS'}</span>
-              {hasMoreItems ? <ChevronDown size={18} /> : <ChevronUp size={18} />}
+              <span>{isGalleryExpanded ? 'VER MENOS' : `VER MAIS TRABALHOS (${flashCatalog.length - 6} RESTANTES)`}</span>
+              {isGalleryExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             </motion.button>
           </div>
         </div>

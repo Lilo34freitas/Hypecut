@@ -128,8 +128,20 @@ export const WhatsAppWidget = ({
 
       {/* Main WhatsApp Green Floating Button (Responsive sizing for small mobile screens like iPhone SE) */}
       <div className="relative pointer-events-auto">
-        {/* Pulsing Outer Glow / Ripple Effect */}
-        <span className="absolute -inset-1.5 rounded-full bg-[#00D757] opacity-45 animate-ping pointer-events-none" />
+        {/* Periodic Elegant Pulse Ring (Fires smoothly every 3s) */}
+        <motion.span
+          animate={{
+            scale: [1, 1.45, 1.65],
+            opacity: [0.6, 0.25, 0],
+          }}
+          transition={{
+            duration: 1.8,
+            repeat: Infinity,
+            repeatDelay: 2.5,
+            ease: "easeOut",
+          }}
+          className="absolute -inset-1 rounded-full bg-[#00D757] pointer-events-none"
+        />
 
         <a
           href={whatsappUrl}

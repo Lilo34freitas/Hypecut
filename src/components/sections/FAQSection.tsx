@@ -81,18 +81,27 @@ export const FAQSection = () => {
                   return (
                     <div
                       key={i}
-                      className={`rounded-none border-2 transition-all duration-300 overflow-hidden cursor-pointer p-5 md:p-6 ${
+                      className={`rounded-none border-2 transition-colors duration-200 overflow-hidden cursor-pointer p-5 md:p-6 select-none ${
                         isOpen 
                           ? 'border-[#5E308A] bg-[#121212] text-white shadow-2xl' 
                           : 'border-transparent bg-[#F2EAD9] text-[#0B0908] hover:bg-white shadow-md'
                       }`}
                       onClick={() => setOpenIndex(isOpen ? null : i)}
+                      role="button"
+                      aria-expanded={isOpen}
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          setOpenIndex(isOpen ? null : i);
+                        }
+                      }}
                     >
                       <div className="flex items-center justify-between gap-4">
-                        <h3 className={`font-extrabold uppercase text-sm sm:text-base md:text-lg tracking-wide ${isOpen ? 'text-[#5E308A]' : 'text-[#0B0908]'}`}>
+                        <h3 className={`font-extrabold uppercase text-sm sm:text-base md:text-lg tracking-wide transition-colors duration-200 ${isOpen ? 'text-[#5E308A]' : 'text-[#0B0908]'}`}>
                           {faq.q}
                         </h3>
-                        <div className={`w-7 h-7 rounded-none flex items-center justify-center shrink-0 transition-transform ${isOpen ? 'bg-[#5E308A] text-white' : 'bg-[#0B0908]/10 text-[#0B0908]'}`}>
+                        <div className={`w-7 h-7 rounded-none flex items-center justify-center shrink-0 transition-colors duration-200 ${isOpen ? 'bg-[#5E308A] text-white' : 'bg-[#0B0908]/10 text-[#0B0908]'}`}>
                           {isOpen ? <Minus size={18} /> : <Plus size={18} />}
                         </div>
                       </div>
@@ -100,15 +109,31 @@ export const FAQSection = () => {
                       <AnimatePresence initial={false}>
                         {isOpen && (
                           <motion.div
-                            initial={{ height: 0, opacity: 0, marginTop: 0 }}
-                            animate={{ height: "auto", opacity: 1, marginTop: 16 }}
-                            exit={{ height: 0, opacity: 0, marginTop: 0 }}
-                            transition={{ duration: 0.3, ease: [0.04, 0.62, 0.23, 0.98] }}
-                            className="overflow-hidden border-t border-white/10 pt-4"
+                            key="content"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ 
+                              height: 'auto', 
+                              opacity: 1,
+                              transition: {
+                                height: { duration: 0.28, ease: [0.16, 1, 0.3, 1] },
+                                opacity: { duration: 0.2, ease: "easeOut" }
+                              }
+                            }}
+                            exit={{ 
+                              height: 0, 
+                              opacity: 0,
+                              transition: {
+                                height: { duration: 0.22, ease: [0.16, 1, 0.3, 1] },
+                                opacity: { duration: 0.15, ease: "easeIn" }
+                              }
+                            }}
+                            className="overflow-hidden"
                           >
-                            <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-semibold">
-                              {faq.a}
-                            </p>
+                            <div className="pt-4 mt-4 border-t border-white/10">
+                              <p className="text-white/90 text-xs sm:text-sm md:text-base leading-relaxed font-semibold">
+                                {faq.a}
+                              </p>
+                            </div>
                           </motion.div>
                         )}
                       </AnimatePresence>

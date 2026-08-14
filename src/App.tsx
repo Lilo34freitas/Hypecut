@@ -1,13 +1,18 @@
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Lenis from 'lenis';
 import { Home } from './pages/Home';
 import { AboutPage } from './pages/AboutPage';
 import { ServicesPage } from './pages/ServicesPage';
 import { TattooPage } from './pages/TattooPage';
+import { AdminPage } from './pages/AdminPage';
 import { WhatsAppWidget } from './components/ui/WhatsAppWidget';
+import { BookingWizard } from './components/ui/BookingWizard';
+import { ClientManageModal } from './components/ui/ClientManageModal';
+import { AuthModal } from './components/ui/AuthModal';
+import { AuthProvider } from './context/AuthContext';
 
-function ScrollToHashElement() {
+function ScrollToHashElement({ lenis }: { lenis: Lenis | null }) {
   const { hash, pathname } = useLocation();
 
   useEffect(() => {
@@ -17,31 +22,68 @@ function ScrollToHashElement() {
       if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
       }
+    } else {
+      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      document.body.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+      if (lenis) {
+        lenis.scrollTo(0, { immediate: true });
+      }
     }
-  }, [hash, pathname]);
+  }, [hash, pathname, lenis]);
 
   return null;
 }
 
-import { useState } from 'react';
-import { AdminPage } from './pages/AdminPage';
-import { BookingWizard } from './components/ui/BookingWizard';
-import { ClientManageModal } from './components/ui/ClientManageModal';
-
-function App() {
+function MainApp() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [selectedServiceId, setSelectedServiceId] = useState<string | undefined>(undefined);
   const [isManageOpen, setIsManageOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [lenisRef, setLenisRef] = useState<Lenis | null>(null);
+
+  const isAnyModalOpen = isBookingOpen || isManageOpen || isAuthOpen;
+
+  // Lock site scroll when modal is open
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+      if (lenisRef) lenisRef.stop();
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+      if (lenisRef) lenisRef.start();
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [isAnyModalOpen, lenisRef]);
 
   useEffect(() => {
-    const handleOpenBooking = () => setIsBookingOpen(true);
+    const handleOpenBooking = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (customEvent.detail?.serviceTitle || customEvent.detail?.serviceId) {
+        setSelectedServiceId(customEvent.detail.serviceTitle || customEvent.detail.serviceId);
+      } else {
+        setSelectedServiceId(undefined);
+      }
+      setIsBookingOpen(true);
+    };
+
     const handleOpenManage = () => setIsManageOpen(true);
+    const handleOpenAuth = () => setIsAuthOpen(true);
 
     window.addEventListener('open-booking-modal', handleOpenBooking);
     window.addEventListener('open-manage-modal', handleOpenManage);
+    window.addEventListener('open-auth-modal', handleOpenAuth);
 
     return () => {
       window.removeEventListener('open-booking-modal', handleOpenBooking);
       window.removeEventListener('open-manage-modal', handleOpenManage);
+      window.removeEventListener('open-auth-modal', handleOpenAuth);
     };
   }, []);
 
@@ -55,6 +97,8 @@ function App() {
       wheelMultiplier: 1,
       touchMultiplier: 2,
     });
+
+    setLenisRef(lenis);
 
     function raf(time: number) {
       lenis.raf(time);
@@ -70,7 +114,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <ScrollToHashElement />
+      <ScrollToHashElement lenis={lenisRef} />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/sobre" element={<AboutPage />} />
@@ -79,10 +123,28 @@ function App() {
         <Route path="/admin" element={<AdminPage />} />
       </Routes>
       <WhatsAppWidget />
-      <BookingWizard isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
-      <ClientManageModal isOpen={isManageOpen} onClose={() => setIsManageOpen(false)} />
+      <BookingWizard
+        isOpen={isBookingOpen}
+        onClose={() => setIsBookingOpen(false)}
+        initialServiceId={selectedServiceId}
+      />
+      <ClientManageModal
+        isOpen={isManageOpen}
+        onClose={() => setIsManageOpen(false)}
+        onOpenAuth={() => setIsAuthOpen(true)}
+      />
+      <AuthModal
+        isOpen={isAuthOpen}
+        onClose={() => setIsAuthOpen(false)}
+      />
     </BrowserRouter>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <AuthProvider>
+      <MainApp />
+    </AuthProvider>
+  );
+}

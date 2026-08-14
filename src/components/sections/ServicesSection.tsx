@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { BlurText } from '../ui/BlurText';
 
 const mobileServices = [
   {
@@ -53,7 +54,7 @@ export const ServicesSection = () => {
         {/* Header Layout matching the HypeCut official brand design */}
         <div className="mb-12 md:mb-16">
           <h2 className="text-4xl md:text-6xl lg:text-7xl font-black uppercase text-[#F2EAD9] tracking-tight">
-            NOSSOS <span className="text-[#5E308A]">SERVIÇOS</span>
+            <BlurText text="NOSSOS SERVIÇOS" delay={90} animateBy="words" direction="top" />
           </h2>
         </div>
 

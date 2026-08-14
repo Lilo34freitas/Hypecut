@@ -1,5 +1,17 @@
 import { motion } from 'framer-motion';
-import { MapPin, Phone, Mail, ArrowRight, Compass } from 'lucide-react';
+import { MapPin, Phone, Mail, Compass } from 'lucide-react';
+
+const InstagramIcon = () => (
+  <svg className="w-4 h-4 text-[#5E308A] fill-current shrink-0" viewBox="0 0 24 24">
+    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+  </svg>
+);
+
+const TikTokIcon = () => (
+  <svg className="w-4 h-4 text-[#5E308A] fill-current shrink-0" viewBox="0 0 24 24">
+    <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.96-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.82.56-1.36 1.48-1.42 2.48-.12 1.13.43 2.27 1.35 2.92 1.05.74 2.47.8 3.58.19.98-.53 1.56-1.58 1.64-2.69.04-3.96.02-7.92.03-11.88z"/>
+  </svg>
+);
 
 export const LocationSection = () => {
   return (
@@ -94,7 +106,7 @@ export const LocationSection = () => {
 
         </div>
 
-        {/* BOTTOM: Unit Highlight Card in Cream Off-White #F2EAD9 (Borderless) */}
+        {/* BOTTOM: Unit Highlight Card with All Contacts & Socials on the same line (Borderless) */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -112,35 +124,46 @@ export const LocationSection = () => {
             </p>
           </div>
 
-          {/* Contact Details */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 lg:gap-8 text-xs md:text-sm text-[#0B0908] font-bold border-y lg:border-y-0 lg:border-x border-[#0B0908]/20 py-4 lg:py-0 lg:px-8 w-full lg:w-auto">
+          {/* Contact & Social Details on the same line */}
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 lg:gap-8 text-xs md:text-sm text-[#0B0908] font-bold">
             <a 
-              href="https://wa.me/5547999995843" 
+              href="https://wa.me/5547999595843" 
               target="_blank" 
               rel="noreferrer" 
-              className="flex items-center gap-2 hover:text-[#5E308A] transition-colors"
+              className="flex items-center gap-2 hover:text-[#5E308A] transition-colors group"
             >
-              <Phone size={16} className="text-[#5E308A]" />
+              <Phone size={16} className="text-[#5E308A] group-hover:scale-110 transition-transform" />
               <span>(47) 99959-5843</span>
             </a>
 
             <a 
               href="mailto:contato@hypecut.com.br" 
-              className="flex items-center gap-2 hover:text-[#5E308A] transition-colors"
+              className="flex items-center gap-2 hover:text-[#5E308A] transition-colors group"
             >
-              <Mail size={16} className="text-[#5E308A]" />
+              <Mail size={16} className="text-[#5E308A] group-hover:scale-110 transition-transform" />
               <span>contato@hypecut.com.br</span>
             </a>
-          </div>
 
-          {/* Single Action Button titled GALERIA */}
-          <a
-            href="/sobre"
-            className="w-full lg:w-auto py-4 px-8 rounded-none bg-[#0B0908] hover:bg-black text-white font-black text-xs md:text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-all duration-300 shadow-lg group shrink-0"
-          >
-            <span>GALERIA</span>
-            <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-          </a>
+            <a 
+              href="https://instagram.com/hypecut.barber" 
+              target="_blank" 
+              rel="noreferrer" 
+              className="flex items-center gap-2 hover:text-[#5E308A] transition-colors group"
+            >
+              <InstagramIcon />
+              <span>@hypecut.barber</span>
+            </a>
+
+            <a 
+              href="https://wa.me/5547999995843" 
+              target="_blank" 
+              rel="noreferrer" 
+              className="flex items-center gap-2 hover:text-[#5E308A] transition-colors group"
+            >
+              <TikTokIcon />
+              <span>TikTok</span>
+            </a>
+          </div>
         </motion.div>
 
       </div>

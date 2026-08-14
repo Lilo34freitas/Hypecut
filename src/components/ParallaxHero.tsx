@@ -1,6 +1,7 @@
 import { useRef } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ButtonAgendar } from './ui/ButtonAgendar';
+import { BlurText } from './ui/BlurText';
 
 export const ParallaxHero = () => {
   const ref = useRef<HTMLDivElement>(null);
@@ -21,14 +22,17 @@ export const ParallaxHero = () => {
       id="inicio"
       className="relative min-h-[100dvh] h-[100dvh] w-full flex items-center overflow-hidden bg-bg-darkest"
     >
-      {/* Custom Bottom Dashed Line (traçado) full width */}
-      <div className="absolute bottom-0 left-0 w-full h-[3px] border-b-[3px] border-dashed border-[#5E308A] z-40" />
-      {/* Background Video / Image */}
+      {/* Sleek Bottom Glow Divider */}
+      <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#5E308A] to-transparent z-40 shadow-[0_0_15px_rgba(94,48,138,0.9)]" />
+
+      {/* Background Video / Image - High Luminosity & Vibrant Visibility */}
       <motion.div 
-        className="absolute inset-0 z-0 opacity-60"
+        className="absolute inset-0 z-0 opacity-85"
         style={{ y: yBg }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B0908]/40 to-bg-darkest z-10" />
+        {/* Soft Radial Vignette + Left Reading Gradient (Clear Center Action) */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0B0908]/80 via-transparent to-[#0B0908]/40 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-bg-darkest/90 via-transparent to-black/25 z-10" />
         <video 
           autoPlay 
           loop 
@@ -40,27 +44,32 @@ export const ParallaxHero = () => {
         </video>
       </motion.div>
 
-      {/* Content */}
-      <div className="relative z-20 w-full px-6 md:px-12 lg:px-20 flex flex-col justify-end items-start h-full pt-32 pb-20 md:pb-24 lg:pb-16 xl:pb-28">
+      {/* Content with Enhanced Staggered Entrance Animation */}
+      <div className="relative z-20 w-full px-6 md:px-12 lg:px-20 flex flex-col justify-end items-start h-full pt-32 pb-20 md:pb-24 lg:pb-14 xl:pb-16 2xl:pb-24">
         <motion.div 
           style={{ y: yText, opacity }}
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.2, ease: "easeOut" }}
+          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-[1200px] flex flex-col items-start"
         >
-          <h1 className="font-display font-black text-4xl xs:text-5xl sm:text-7xl md:text-[8rem] lg:text-[11rem] text-text-primary uppercase leading-[1.05] tracking-[0.02em] sm:tracking-[0.03em] mb-2 md:mb-4">
-            ESTILO,<br/>PRECISÃO E<br/>ATITUDE
+          <h1 className="font-display font-black text-4xl xs:text-5xl sm:text-7xl md:text-7xl lg:text-[3.75rem] xl:text-[4.5rem] 2xl:text-[5.25rem] min-[1800px]:text-[7.5rem] min-[2200px]:text-[9.5rem] text-text-primary uppercase leading-[1.05] tracking-[0.02em] sm:tracking-[0.03em] mb-2 md:mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">
+            <BlurText text="ESTILO, PRECISÃO E ATITUDE" delay={90} animateBy="words" direction="top" />
           </h1>
           
-          <p className="text-[#5E308A] font-bold tracking-[3px] sm:tracking-[6px] md:tracking-[10px] uppercase mt-3 sm:mt-4 md:mt-8 text-sm sm:text-lg md:text-2xl lg:text-3xl ml-0.5 sm:ml-1 md:ml-2">
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: "easeOut" }}
+            className="text-[#9D68D3] font-black tracking-[3px] sm:tracking-[6px] md:tracking-[6px] lg:tracking-[6px] xl:tracking-[7px] 2xl:tracking-[8px] min-[1800px]:tracking-[10px] uppercase mt-3 sm:mt-4 md:mt-5 lg:mt-4 xl:mt-5 2xl:mt-6 text-sm sm:text-lg md:text-xl lg:text-lg xl:text-xl 2xl:text-2xl min-[1800px]:text-3xl ml-0.5 sm:ml-1 md:ml-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]"
+          >
             Barber & Tattoo de Excelência
-            <span className="inline-flex tracking-[2px] ml-1">
+            <span className="inline-flex tracking-[2px] ml-1 text-white">
               <span className="dot-typing">.</span>
               <span className="dot-typing">.</span>
               <span className="dot-typing">.</span>
             </span>
-          </p>
+          </motion.p>
         </motion.div>
       </div>
 
@@ -76,7 +85,7 @@ export const ParallaxHero = () => {
         <p className="text-lg lg:text-xl font-medium text-nav-text/90 mb-3">Terça-feira a sexta-feira das 09h às 21h</p>
         <p className="text-lg lg:text-xl font-medium text-nav-text/90 mb-6">Sábado das 08h às 17h</p>
         <div className="mt-auto self-start">
-          <ButtonAgendar />
+          <ButtonAgendar onClick={() => window.dispatchEvent(new CustomEvent('open-booking-modal'))} />
         </div>
       </motion.div>
     </div>

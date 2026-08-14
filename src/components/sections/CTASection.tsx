@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 
 export const CTASection = () => {
@@ -5,7 +6,13 @@ export const CTASection = () => {
     <section className="w-full relative py-20 md:py-28 overflow-hidden bg-[#F2EAD9] text-[#0B0908] border-t border-b border-[#0B0908]/10">
       
       {/* Content Container (Full Width, Centered Elements, Solid Off-White Background) */}
-      <div className="relative z-10 w-full px-6 md:px-12 max-w-[1700px] mx-auto flex flex-col items-center justify-center text-center">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-60px" }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="relative z-10 w-full px-6 md:px-12 max-w-[1700px] mx-auto flex flex-col items-center justify-center text-center"
+      >
         
         {/* Flanking Horizontal Lines with Original Navbar Logo */}
         <div className="flex items-center justify-center gap-4 sm:gap-8 w-full max-w-4xl mb-8">
@@ -33,13 +40,13 @@ export const CTASection = () => {
           href="https://wa.me/5547999595843?text=Ol%C3%A1!%20Gostaria%20de%20agendar%20um%20hor%C3%A1rio%20na%20HypeCut."
           target="_blank"
           rel="noreferrer"
-          className="Btn-purple !h-14 !px-8 sm:!px-10 text-xs sm:text-sm md:text-base font-black tracking-widest uppercase shadow-2xl cursor-pointer"
+          className="Btn-purple !h-14 !px-8 sm:!px-10 text-xs sm:text-sm md:text-base font-black tracking-widest uppercase shadow-2xl cursor-pointer hover:scale-[1.02] active:scale-95 transition-all"
         >
           <span>CLIQUE AQUI E AGENDE PELO WHATSAPP</span>
           <ArrowRight size={20} className="relative z-10" />
         </a>
 
-      </div>
+      </motion.div>
     </section>
   );
 };

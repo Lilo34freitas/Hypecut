@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Wifi, Car, Snowflake, Scissors, Beer, Cookie, Baby, Accessibility } from 'lucide-react';
 import { ButtonAgendar } from './ui/ButtonAgendar';
+import { BlurText } from './ui/BlurText';
 
 const features = [
   { icon: Wifi, text: 'WI-FI GRÁTIS' },
@@ -15,7 +16,7 @@ const features = [
 
 export const AboutSection = () => {
   return (
-    <section id="sobre" className="relative bg-bg-darkest py-24 w-full border-b-[3px] border-dashed border-[#5E308A] overflow-hidden">
+    <section id="sobre" className="relative bg-bg-darkest py-24 w-full border-b border-white/10 overflow-hidden">
       <div className="max-w-[1400px] mx-auto px-6 md:px-12 lg:px-20">
         
         {/* Top Part: Image and Text */}
@@ -23,13 +24,13 @@ export const AboutSection = () => {
           
           {/* Image */}
           <motion.div 
-            initial={{ opacity: 0, x: -50 }}
+            initial={{ opacity: 0, x: -40 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.8 }}
             className="w-full lg:w-[50%]"
           >
-            <div className="relative border border-surface-border p-2 rounded-xl bg-black/20 w-full h-full">
+            <div className="relative border border-surface-border p-2 rounded-xl bg-black/20 w-full h-full shadow-2xl">
               <img 
                 src="/about_teste%202.png" 
                 alt="Sobre a Hype Cut" 
@@ -40,18 +41,17 @@ export const AboutSection = () => {
 
           {/* Text Content */}
           <motion.div 
-            initial={{ opacity: 0, x: 50 }}
+            initial={{ opacity: 0, x: 40 }}
             whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.8 }}
             className="w-full lg:w-[50%] flex flex-col items-start justify-between py-1"
           >
             <h2 className="text-4xl lg:text-5xl lg:text-[3.5rem] font-black text-text-primary mb-8 uppercase tracking-tight leading-tight">
-              SOBRE O MOVIMENTO <br/>
-              <span className="text-[#5E308A]">HYPECUT</span>
+              <BlurText text="SOBRE O MOVIMENTO HYPECUT" delay={80} animateBy="words" direction="top" />
             </h2>
             
-            <div className="space-y-6 text-lg text-text-primary/90 mb-10 font-medium text-justify">
+            <div className="space-y-6 text-base sm:text-lg text-[#F2EAD9]/95 mb-10 font-normal leading-relaxed text-left">
               <p>
                 A Hype Cut é especialista no cuidado do visual masculino e na arte urbana, unindo o melhor da barbearia de alta precisão a um estúdio de tattoo exclusivo. Nosso compromisso é estar sempre à frente das tendências, aprimorando continuamente nossas técnicas de corte, barba e pigmentação para destacar a identidade única de cada cliente.
               </p>

@@ -3,11 +3,13 @@ import { motion } from 'framer-motion';
 import {
   Calendar,
   Lock,
+  Mail,
   RefreshCw,
   LogOut,
   ChevronLeft,
   Grid,
   List,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   fetchAppointmentsForDate,
@@ -15,13 +17,17 @@ import {
   fetchProfessionals,
   toLocalDateStr,
 } from '../lib/apiHandlers';
+import { useAuth } from '../context/AuthContext';
 import { StaffCalendarGrid } from '../components/ui/StaffCalendarGrid';
 import { EditAppointmentModal } from '../components/ui/EditAppointmentModal';
 
 export const AdminPage: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const { user, isAdmin, loginAdmin, logout } = useAuth();
+  
+  const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
-  const [authError, setAuthError] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string>('');
+  const [authLoading, setAuthLoading] = useState<boolean>(false);
 
   const [selectedDate, setSelectedDate] = useState<string>(
     toLocalDateStr(new Date()) || new Date().toISOString().split('T')[0]
@@ -44,18 +50,13 @@ export const AdminPage: React.FC = () => {
   const [cancellingApptId, setCancellingApptId] = useState<string | null>(null);
   const [cancelReasonInput, setCancelReasonInput] = useState<string>('');
 
-  useEffect(() => {
-    const session = localStorage.getItem('hypecut_admin_auth');
-    if (session === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
+  const isAuthorized = Boolean(user && isAdmin);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthorized) {
       loadData();
     }
-  }, [isAuthenticated, selectedDate, showAllDates]);
+  }, [isAuthorized, selectedDate, showAllDates]);
 
   const loadData = async () => {
     setLoading(true);
@@ -74,20 +75,21 @@ export const AdminPage: React.FC = () => {
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password === 'admin' || password === 'hypecut2026') {
-      setIsAuthenticated(true);
-      localStorage.setItem('hypecut_admin_auth', 'true');
-      setAuthError(false);
-    } else {
-      setAuthError(true);
+    setAuthLoading(true);
+    setAuthError('');
+    try {
+      await loginAdmin(email, password);
+    } catch (err: any) {
+      setAuthError(err?.message || 'Falha ao autenticar administrador.');
+    } finally {
+      setAuthLoading(false);
     }
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    localStorage.removeItem('hypecut_admin_auth');
+  const handleLogout = async () => {
+    await logout();
   };
 
   const handleStatusChange = async (id: string, newStatus: string, reason?: string) => {
@@ -129,7 +131,7 @@ export const AdminPage: React.FC = () => {
     ? appointments
     : appointments.filter((a) => a.status === statusFilter);
 
-  if (!isAuthenticated) {
+  if (!isAuthorized) {
     return (
       <div className="min-h-screen bg-[#0B0908] flex items-center justify-center p-4 text-[#F2EAD9]">
         <motion.div
@@ -152,30 +154,51 @@ export const AdminPage: React.FC = () => {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="text-xs font-black uppercase text-[#F2EAD9] block mb-1.5">
+                E-MAIL DO ADMINISTRADOR
+              </label>
+              <div className="relative">
+                <input
+                  type="email"
+                  required
+                  placeholder="admin@hypecut.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full py-3.5 pl-11 pr-4 bg-white/5 border border-white/20 focus:border-[#5E308A] text-white text-sm outline-none"
+                />
+                <Mail size={18} className="absolute left-4 top-3.5 text-white/40" />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-black uppercase text-[#F2EAD9] block mb-1.5">
                 SENHA DE ACESSO
               </label>
               <div className="relative">
                 <input
                   type="password"
-                  placeholder="Digite a senha..."
+                  required
+                  placeholder="Digite sua senha..."
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full py-3.5 pl-11 pr-4 bg-white/5 border border-white/20 focus:border-[#5E308A] text-white text-sm outline-none"
                 />
                 <Lock size={18} className="absolute left-4 top-3.5 text-white/40" />
               </div>
-              {authError && (
-                <p className="text-xs font-bold text-red-400 mt-1.5">
-                  Senha incorreta! Tente novamente.
-                </p>
-              )}
             </div>
+
+            {authError && (
+              <div className="p-3 bg-red-500/10 border border-red-500/30 text-xs font-bold text-red-400 flex items-center gap-2">
+                <ShieldAlert size={16} className="shrink-0 text-red-400" />
+                <span>{authError}</span>
+              </div>
+            )}
 
             <button
               type="submit"
-              className="Btn-purple w-full font-black text-xs uppercase tracking-widest py-3.5"
+              disabled={authLoading}
+              className="Btn-purple w-full font-black text-xs uppercase tracking-widest py-3.5 disabled:opacity-50"
             >
-              <span>ACESSAR PAINEL ›</span>
+              <span>{authLoading ? 'AUTENTICANDO...' : 'ACESSAR PAINEL ›'}</span>
             </button>
           </form>
 
@@ -203,17 +226,17 @@ export const AdminPage: React.FC = () => {
               PAINEL DA EQUIPE & GESTÃO <span className="text-[#5E308A]">HYPECUT</span>
             </h1>
             <p className="text-[11px] text-white/60 font-bold uppercase">
-              Controle de Agenda, Edição & Métricas Operacionais
+              Controle de Agenda, Edição & Métricas Operacionais ({user?.name})
             </p>
           </div>
         </div>
 
         <button
           onClick={handleLogout}
-          className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-red-900/40 text-xs font-bold uppercase border border-white/20 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-red-900/40 text-xs font-bold uppercase border border-white/20 transition-colors cursor-pointer"
         >
           <LogOut size={16} />
-          <span className="hidden sm:inline">Sair</span>
+          <span className="hidden sm:inline">Sair ({user?.email})</span>
         </button>
       </header>
 
@@ -237,7 +260,7 @@ export const AdminPage: React.FC = () => {
             />
             <button
               onClick={() => setShowAllDates(!showAllDates)}
-              className={`px-3 py-2 text-xs font-black uppercase border transition-all ${
+              className={`px-3 py-2 text-xs font-black uppercase border transition-all cursor-pointer ${
                 showAllDates
                   ? 'bg-[#5E308A] text-white border-[#9D4EDD]'
                   : 'bg-white/5 text-white/70 border-white/20 hover:bg-white/10'
@@ -252,7 +275,7 @@ export const AdminPage: React.FC = () => {
             <div className="flex bg-white/5 p-1 border border-white/10">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase transition-colors cursor-pointer ${
                   viewMode === 'grid' ? 'bg-[#5E308A] text-white' : 'text-white/60 hover:text-white'
                 }`}
               >
@@ -261,7 +284,7 @@ export const AdminPage: React.FC = () => {
               </button>
               <button
                 onClick={() => setViewMode('table')}
-                className={`flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2 text-xs font-black uppercase transition-colors cursor-pointer ${
                   viewMode === 'table' ? 'bg-[#5E308A] text-white' : 'text-white/60 hover:text-white'
                 }`}
               >
@@ -272,7 +295,7 @@ export const AdminPage: React.FC = () => {
 
             <button
               onClick={loadData}
-              className="p-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20"
+              className="p-2.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 cursor-pointer"
               title="Atualizar dados"
             >
               <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
@@ -355,7 +378,7 @@ export const AdminPage: React.FC = () => {
                   <button
                     key={st}
                     onClick={() => setStatusFilter(st)}
-                    className={`px-3 py-1.5 text-[10px] font-black uppercase ${
+                    className={`px-3 py-1.5 text-[10px] font-black uppercase cursor-pointer ${
                       statusFilter === st ? 'bg-[#5E308A] text-white' : 'text-white/60 hover:text-white'
                     }`}
                   >
@@ -481,13 +504,13 @@ export const AdminPage: React.FC = () => {
             <div className="flex gap-2">
               <button
                 onClick={() => setCancellingApptId(null)}
-                className="w-full py-2.5 bg-white/10 text-white font-black text-xs uppercase"
+                className="w-full py-2.5 bg-white/10 text-white font-black text-xs uppercase cursor-pointer"
               >
                 VOLTAR
               </button>
               <button
                 onClick={() => handleStatusChange(cancellingApptId, 'CANCELLED', cancelReasonInput)}
-                className="w-full py-2.5 bg-red-700 hover:bg-red-600 text-white font-black text-xs uppercase"
+                className="w-full py-2.5 bg-red-700 hover:bg-red-600 text-white font-black text-xs uppercase cursor-pointer"
               >
                 CONFIRMAR
               </button>

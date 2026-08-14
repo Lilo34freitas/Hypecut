@@ -6,6 +6,7 @@ import { Navbar } from '../components/Navbar';
 import { Footer } from '../components/sections/Footer';
 import { ButtonAgendar } from '../components/ui/ButtonAgendar';
 import { CursorGrid } from '../components/ui/CursorGrid';
+import { BlurText } from '../components/ui/BlurText';
 
 interface ServiceItem {
   title: string;
@@ -113,7 +114,7 @@ export const ServicesPage = () => {
               transition={{ duration: 0.5 }}
             >
               <h1 className="text-4xl md:text-6xl lg:text-7xl font-black uppercase tracking-tight text-[#F2EAD9] mb-4 text-left">
-                SERVIÇOS <span className="text-[#5E308A]">HYPE</span>
+                <BlurText text="SERVIÇOS HYPE" delay={90} animateBy="words" direction="top" />
               </h1>
               <p className="text-[#F2EAD9]/70 text-xs md:text-sm font-medium leading-relaxed text-left max-w-3xl">
                 Confira em detalhes todas as nossas opções de corte, cuidados com a barba, tratamentos capilares, estéticos e tattoo autoral.
@@ -207,7 +208,14 @@ export const ServicesPage = () => {
               {currentServices.map((service) => (
                 <div
                   key={service.title}
-                  className="group relative py-5 px-6 rounded-none border border-[#F2EAD9]/20 hover:border-[#5E308A] bg-[#18181b] hover:bg-[#221f28] transition-all duration-300 flex items-center justify-between overflow-hidden shadow-lg"
+                  onClick={() => {
+                    window.dispatchEvent(
+                      new CustomEvent('open-booking-modal', {
+                        detail: { serviceTitle: service.title }
+                      })
+                    );
+                  }}
+                  className="group relative py-5 px-6 rounded-none border border-[#F2EAD9]/20 hover:border-[#5E308A] bg-[#18181b] hover:bg-[#221f28] transition-all duration-300 flex items-center justify-between overflow-hidden shadow-lg cursor-pointer"
                 >
                   <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#5E308A] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
@@ -227,11 +235,14 @@ export const ServicesPage = () => {
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-3 shrink-0">
+                  <div className="flex flex-col items-end gap-2 shrink-0">
                     <span className="text-lg md:text-2xl font-black text-[#F2EAD9] group-hover:text-[#5E308A] transition-all duration-300 whitespace-nowrap">
                       {service.price}
                     </span>
-                    <ArrowRight size={20} className="text-[#5E308A] opacity-0 group-hover:opacity-100 -translate-x-3 group-hover:translate-x-0 transition-all duration-300" />
+                    <button className="px-3 py-1.5 bg-[#5E308A] group-hover:bg-[#6C3DFF] text-[#F2EAD9] text-[10px] font-black uppercase tracking-wider transition-all flex items-center gap-1.5 shadow-md">
+                      <span>Agendar</span>
+                      <ArrowRight size={12} />
+                    </button>
                   </div>
                 </div>
               ))}
