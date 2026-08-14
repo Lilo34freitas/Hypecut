@@ -48,8 +48,8 @@ export const Navbar = () => {
             ? "opacity-0 -translate-y-8 pointer-events-none"
             : "opacity-100 translate-y-0 pointer-events-auto",
           effectiveScrolled
-            ? "bg-[#F2EAD9]/95 backdrop-blur-md border-b border-[#0B0908]/10 py-2 lg:py-3 shadow-md"
-            : "bg-[#F2EAD9] py-4 sm:py-6 lg:py-8"
+            ? "bg-[#F2EAD9]/95 backdrop-blur-md border-b border-[#0B0908]/10 py-1.5 sm:py-2 shadow-md"
+            : "bg-[#F2EAD9] py-2 sm:py-2.5 lg:py-3"
         )}
       >
         <div className="w-full px-4 sm:px-6 lg:px-12 flex justify-between items-center">
@@ -60,8 +60,8 @@ export const Navbar = () => {
               className={cn(
                 "h-auto object-contain object-left transition-all duration-500 ease-in-out",
                 effectiveScrolled 
-                  ? "w-[140px] sm:w-[170px] md:w-[190px] lg:w-[280px] xl:w-[350px]" 
-                  : "w-[180px] sm:w-[220px] md:w-[230px] lg:w-[360px] xl:w-[550px]"
+                  ? "w-[120px] sm:w-[140px] md:w-[160px] lg:w-[190px] xl:w-[220px]" 
+                  : "w-[130px] sm:w-[155px] md:w-[180px] lg:w-[220px] xl:w-[260px]"
               )}
             />
           </a>
@@ -69,13 +69,13 @@ export const Navbar = () => {
           {/* Desktop Menu */}
           <div className={cn(
             "hidden md:flex items-center transition-all duration-500 ease-in-out",
-            effectiveScrolled ? "gap-2.5 lg:gap-4 xl:gap-6" : "gap-3 lg:gap-6 xl:gap-8"
+            effectiveScrolled ? "gap-2.5 lg:gap-4 xl:gap-5" : "gap-3 lg:gap-5 xl:gap-6"
           )}>
             <a 
               href="/" 
               className={cn(
                 "font-bold tracking-wider text-nav-text hover:text-text-accent transition-all duration-500 uppercase",
-                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.8rem]" : "text-[0.75rem] md:text-[0.78rem] xl:text-[1rem]",
+                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.78rem]" : "text-[0.72rem] md:text-[0.76rem] xl:text-[0.82rem]",
                 location.pathname === '/' && "text-text-accent"
               )}
             >
@@ -86,7 +86,7 @@ export const Navbar = () => {
               href="/sobre" 
               className={cn(
                 "font-bold tracking-wider text-nav-text hover:text-text-accent transition-all duration-500 uppercase",
-                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.8rem]" : "text-[0.75rem] md:text-[0.78rem] xl:text-[1rem]",
+                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.78rem]" : "text-[0.72rem] md:text-[0.76rem] xl:text-[0.82rem]",
                 isAboutPage && "text-text-accent"
               )}
             >
@@ -94,17 +94,17 @@ export const Navbar = () => {
             </a>
 
             {/* Dropdown Services (Trigger does not navigate, only subitems do) */}
-            <div className="relative group cursor-pointer py-2">
+            <div className="relative group cursor-pointer py-1.5">
               <button 
                 type="button"
                 className={cn(
                   "font-bold tracking-wider text-nav-text group-hover:text-text-accent transition-all duration-500 uppercase flex items-center gap-1 cursor-pointer bg-transparent border-none p-0 outline-none",
-                  effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.8rem]" : "text-[0.75rem] md:text-[0.78rem] xl:text-[1rem]",
+                  effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.78rem]" : "text-[0.72rem] md:text-[0.76rem] xl:text-[0.82rem]",
                   location.pathname.startsWith('/servicos') && "text-text-accent"
                 )}
               >
                 <span>Serviços</span>
-                <ChevronDown size={effectiveScrolled ? 13 : 16} className="transition-transform duration-300 group-hover:rotate-180" />
+                <ChevronDown size={effectiveScrolled ? 13 : 15} className="transition-transform duration-300 group-hover:rotate-180" />
               </button>
               
               {/* Dropdown Menu with padding bridge to prevent accidental closure */}
@@ -122,7 +122,7 @@ export const Navbar = () => {
               href="/tattoo" 
               className={cn(
                 "font-bold tracking-wider text-nav-text hover:text-text-accent transition-all duration-500 uppercase",
-                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.8rem]" : "text-[0.75rem] md:text-[0.78rem] xl:text-[1rem]",
+                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.78rem]" : "text-[0.72rem] md:text-[0.76rem] xl:text-[0.82rem]",
                 isTattooPage && "text-text-accent"
               )}
             >
@@ -133,7 +133,7 @@ export const Navbar = () => {
               onClick={() => setIsContactModalOpen(true)}
               className={cn(
                 "font-bold tracking-wider text-nav-text hover:text-text-accent transition-all duration-500 uppercase cursor-pointer",
-                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.8rem]" : "text-[0.75rem] md:text-[0.78rem] xl:text-[1rem]"
+                effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.78rem]" : "text-[0.72rem] md:text-[0.76rem] xl:text-[0.82rem]"
               )}
             >
               Contato
@@ -144,15 +144,15 @@ export const Navbar = () => {
               <div className="relative">
                 <button
                   onClick={() => setIsUserDropdownOpen(!isUserDropdownOpen)}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-[#5E308A]/10 border border-[#5E308A]/30 text-[#5E308A] hover:bg-[#5E308A]/20 transition-all font-extrabold text-[0.72rem] uppercase tracking-wider cursor-pointer"
+                  className="flex items-center gap-2 px-2.5 py-1 bg-[#5E308A]/10 border border-[#5E308A]/30 text-[#5E308A] hover:bg-[#5E308A]/20 transition-all font-extrabold text-[0.7rem] uppercase tracking-wider cursor-pointer"
                 >
                   {user.avatarUrl ? (
-                    <img src={user.avatarUrl} alt={user.name} className="w-5 h-5 rounded-full object-cover" />
+                    <img src={user.avatarUrl} alt={user.name} className="w-4 h-4 rounded-full object-cover" />
                   ) : (
-                    <UserIcon size={14} />
+                    <UserIcon size={13} />
                   )}
                   <span>{user.name.split(' ')[0]}</span>
-                  <ChevronDown size={13} />
+                  <ChevronDown size={12} />
                 </button>
 
                 {isUserDropdownOpen && (
@@ -188,11 +188,11 @@ export const Navbar = () => {
               <button
                 onClick={() => setIsAuthModalOpen(true)}
                 className={cn(
-                  "font-bold tracking-wider text-[#0B0908]/75 hover:text-[#5E308A] hover:bg-[#5E308A]/10 px-3 py-1.5 border border-[#0B0908]/15 hover:border-[#5E308A]/30 rounded-none transition-all duration-300 uppercase cursor-pointer whitespace-nowrap flex items-center gap-1.5",
-                  effectiveScrolled ? "text-[0.68rem] md:text-[0.7rem] xl:text-[0.78rem]" : "text-[0.74rem] md:text-[0.78rem] xl:text-[0.84rem]"
+                  "font-bold tracking-wider text-[#0B0908]/75 hover:text-[#5E308A] hover:bg-[#5E308A]/10 px-2.5 py-1 border border-[#0B0908]/15 hover:border-[#5E308A]/30 rounded-none transition-all duration-300 uppercase cursor-pointer whitespace-nowrap flex items-center gap-1.5",
+                  effectiveScrolled ? "text-[0.66rem] md:text-[0.68rem] xl:text-[0.74rem]" : "text-[0.7rem] md:text-[0.74rem] xl:text-[0.78rem]"
                 )}
               >
-                <UserIcon size={14} className="text-[#5E308A]" />
+                <UserIcon size={13} className="text-[#5E308A]" />
                 <span>Minha Conta</span>
               </button>
             )}
@@ -201,11 +201,11 @@ export const Navbar = () => {
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('open-booking-modal'))}
               className={cn(
-                "Btn-purple shrink-0 ml-2 sm:ml-4 whitespace-nowrap cursor-pointer shadow-[0_4px_16px_rgba(94,48,138,0.4)] hover:shadow-[0_6px_25px_rgba(94,48,138,0.65)] hover:scale-[1.02] active:scale-95 transition-all",
-                effectiveScrolled ? "!h-10 !px-4 md:!px-5 text-[0.76rem]" : "!h-11 md:!h-12 !px-5 md:!px-7 text-[0.82rem] md:text-[0.9rem]"
+                "Btn-purple shrink-0 ml-1 sm:ml-3 whitespace-nowrap cursor-pointer shadow-[0_4px_16px_rgba(94,48,138,0.4)] hover:shadow-[0_6px_25px_rgba(94,48,138,0.65)] hover:scale-[1.02] active:scale-95 transition-all",
+                effectiveScrolled ? "!h-8 sm:!h-9 !px-3 sm:!px-4 text-[0.72rem]" : "!h-9 sm:!h-10 !px-4 sm:!px-5 text-[0.76rem] sm:text-[0.8rem]"
               )}
             >
-              <Calendar size={effectiveScrolled ? 15 : 18} />
+              <Calendar size={effectiveScrolled ? 14 : 16} />
               <span>AGENDAR HORÁRIO</span>
             </button>
           </div>

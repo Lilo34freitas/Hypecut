@@ -55,7 +55,7 @@ export const ParallaxHero = () => {
       </motion.div>
 
       {/* Content with Enhanced Staggered Entrance Animation */}
-      <div className="relative z-20 w-full px-6 md:px-12 lg:px-20 flex flex-col justify-end items-start h-full pt-32 pb-20 md:pb-24 lg:pb-14 xl:pb-16 2xl:pb-24">
+      <div className="relative z-20 w-full px-6 md:px-12 lg:px-20 flex flex-col justify-end items-start h-full pt-20 pb-12 md:pb-16 lg:pb-12 xl:pb-14">
         <motion.div 
           style={{ y: yText, opacity }}
           initial={{ opacity: 0, y: 40 }}
