@@ -16,19 +16,25 @@ function ScrollToHashElement({ lenis }: { lenis: Lenis | null }) {
   const { hash, pathname } = useLocation();
 
   useEffect(() => {
-    if (hash) {
-      const targetId = hash.replace('#', '');
-      const element = document.getElementById(targetId);
-      if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
+    try {
+      if (hash) {
+        const targetId = hash.replace('#', '');
+        const element = document.getElementById(targetId);
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      } else {
+        window.scrollTo(0, 0);
+        if (lenis) {
+          try {
+            lenis.scrollTo(0, { immediate: true });
+          } catch {
+            // fallback
+          }
+        }
       }
-    } else {
-      window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      document.documentElement.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      document.body.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-      if (lenis) {
-        lenis.scrollTo(0, { immediate: true });
-      }
+    } catch {
+      window.scrollTo(0, 0);
     }
   }, [hash, pathname, lenis]);
 
