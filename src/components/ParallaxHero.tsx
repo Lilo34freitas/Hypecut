@@ -1,17 +1,27 @@
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ButtonAgendar } from './ui/ButtonAgendar';
 import { BlurText } from './ui/BlurText';
 
 export const ParallaxHero = () => {
   const ref = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768 || window.matchMedia('(pointer: coarse)').matches);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start start", "end start"]
   });
 
-  // Parallax effects
+  // Parallax effects (Active exclusively on desktop for ultra-smooth 120Hz native mobile scrolling)
   const yBg = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
   const yText = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
@@ -28,7 +38,7 @@ export const ParallaxHero = () => {
       {/* Background Video / Image - High Luminosity & Vibrant Visibility */}
       <motion.div 
         className="absolute inset-0 z-0 opacity-85"
-        style={{ y: yBg }}
+        style={isMobile ? undefined : { y: yBg }}
       >
         {/* Soft Radial Vignette + Left Reading Gradient (Clear Center Action) */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#0B0908]/80 via-transparent to-[#0B0908]/40 z-10" />
@@ -41,6 +51,7 @@ export const ParallaxHero = () => {
           preload="auto"
           disablePictureInPicture
           disableRemotePlayback
+          poster="/about_teste 2.png"
           ref={(el) => {
             if (el) {
               el.defaultMuted = true;
@@ -57,10 +68,10 @@ export const ParallaxHero = () => {
       {/* Content with Enhanced Staggered Entrance Animation */}
       <div className="relative z-20 w-full px-6 md:px-12 lg:px-20 flex flex-col justify-end items-start h-full pt-20 pb-12 md:pb-16 lg:pb-12 xl:pb-14">
         <motion.div 
-          style={{ y: yText, opacity }}
-          initial={{ opacity: 0, y: 40 }}
+          style={isMobile ? undefined : { y: yText, opacity }}
+          initial={isMobile ? false : { opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-[1200px] flex flex-col items-start"
         >
           <h1 className="font-display font-black text-4xl xs:text-5xl sm:text-7xl md:text-7xl lg:text-[3.75rem] xl:text-[4.5rem] 2xl:text-[5.25rem] min-[1800px]:text-[7.5rem] min-[2200px]:text-[9.5rem] text-text-primary uppercase leading-[1.05] tracking-[0.02em] sm:tracking-[0.03em] mb-2 md:mb-4 drop-shadow-[0_4px_16px_rgba(0,0,0,0.8)]">

@@ -86,10 +86,29 @@ function MainApp() {
     window.addEventListener('open-manage-modal', handleOpenManage);
     window.addEventListener('open-auth-modal', handleOpenAuth);
 
+    // Global touch/scroll listener to instantly unlock and autoplay all videos on iOS Safari & mobile
+    const playAllVideos = () => {
+      document.querySelectorAll('video').forEach((video) => {
+        video.defaultMuted = true;
+        video.muted = true;
+        video.play().catch(() => {});
+      });
+    };
+
+    window.addEventListener('touchstart', playAllVideos, { passive: true });
+    window.addEventListener('click', playAllVideos, { passive: true });
+    window.addEventListener('scroll', playAllVideos, { passive: true });
+
+    // Immediate initial play
+    playAllVideos();
+
     return () => {
       window.removeEventListener('open-booking-modal', handleOpenBooking);
       window.removeEventListener('open-manage-modal', handleOpenManage);
       window.removeEventListener('open-auth-modal', handleOpenAuth);
+      window.removeEventListener('touchstart', playAllVideos);
+      window.removeEventListener('click', playAllVideos);
+      window.removeEventListener('scroll', playAllVideos);
     };
   }, []);
 
