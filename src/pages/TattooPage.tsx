@@ -413,6 +413,16 @@ const ArtistCarousel = ({
                     loop
                     muted
                     playsInline
+                    preload="auto"
+                    disablePictureInPicture
+                    disableRemotePlayback
+                    ref={(el) => {
+                      if (el) {
+                        el.defaultMuted = true;
+                        el.muted = true;
+                        el.play().catch(() => {});
+                      }
+                    }}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100"
                   />
                   <div className="absolute top-2.5 right-2.5 bg-[#5E308A] text-[#F2EAD9] px-2 py-0.5 text-[9px] font-black uppercase flex items-center gap-1 shadow-md z-10">
@@ -515,7 +525,7 @@ export const TattooPage = () => {
         
         {/* Page Header Hero */}
         <div className="mb-16 border-b border-white/10 pb-12">
-          <h1 className="text-7xl sm:text-8xl md:text-9xl lg:text-[10rem] font-black uppercase text-[#F2EAD9] tracking-tight leading-none mb-6">
+          <h1 className="text-4xl xs:text-5xl sm:text-7xl md:text-8xl lg:text-[10rem] font-black uppercase text-[#F2EAD9] tracking-tight leading-none mb-6 whitespace-nowrap">
             <BlurText text="TATTOO" delay={90} animateBy="letters" direction="top" />
           </h1>
 

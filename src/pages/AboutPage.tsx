@@ -315,6 +315,16 @@ export const AboutPage = () => {
             loop 
             muted 
             playsInline
+            preload="auto"
+            disablePictureInPicture
+            disableRemotePlayback
+            ref={(el) => {
+              if (el) {
+                el.defaultMuted = true;
+                el.muted = true;
+                el.play().catch(() => {});
+              }
+            }}
             className="absolute inset-0 w-full h-full object-cover opacity-75"
           >
             <source src="/video_pagina_sobre.mp4" type="video/mp4" />

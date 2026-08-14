@@ -69,6 +69,16 @@ export const HypeCrewSection = () => {
                 loop 
                 muted 
                 playsInline 
+                preload="auto"
+                disablePictureInPicture
+                disableRemotePlayback
+                ref={(el) => {
+                  if (el) {
+                    el.defaultMuted = true;
+                    el.muted = true;
+                    el.play().catch(() => {});
+                  }
+                }}
                 className="w-full h-full object-cover"
               />
               

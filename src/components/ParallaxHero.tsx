@@ -38,6 +38,16 @@ export const ParallaxHero = () => {
           loop 
           muted 
           playsInline
+          preload="auto"
+          disablePictureInPicture
+          disableRemotePlayback
+          ref={(el) => {
+            if (el) {
+              el.defaultMuted = true;
+              el.muted = true;
+              el.play().catch(() => {});
+            }
+          }}
           className="w-full h-full object-cover"
         >
           <source src="/SaveInta.com_AQMOscq4sfh22n2o0SFxu3bN1IkABNfyxTt16iOoF0IamHbXzDeH_Pbdi3adOoAcKvaJgEqP9NNfY_PraFGMu0vGJvc60o8hMCMUmtk.mp4" type="video/mp4" />

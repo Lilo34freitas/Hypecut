@@ -94,28 +94,45 @@ function MainApp() {
   }, []);
 
   useEffect(() => {
-    const lenis = new Lenis({
-      duration: 1.2,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
-      smoothWheel: true,
-      wheelMultiplier: 1,
-      touchMultiplier: 2,
-    });
+    // Check if device is touch-based (iPhone, Android, iPad)
+    const isTouch = typeof window !== 'undefined' && (
+      window.matchMedia('(pointer: coarse)').matches || 
+      'ontouchstart' in window || 
+      navigator.maxTouchPoints > 0
+    );
 
-    setLenisRef(lenis);
-
-    function raf(time: number) {
-      lenis.raf(time);
-      requestAnimationFrame(raf);
+    // On mobile touch devices, use 100% native 120Hz GPU scrolling for zero lag!
+    if (isTouch) {
+      return;
     }
 
-    requestAnimationFrame(raf);
+    try {
+      const lenis = new Lenis({
+        duration: 1.1,
+        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+        orientation: 'vertical',
+        gestureOrientation: 'vertical',
+        smoothWheel: true,
+        wheelMultiplier: 1,
+      });
 
-    return () => {
-      lenis.destroy();
-    };
+      setLenisRef(lenis);
+
+      let animationFrameId: number;
+      function raf(time: number) {
+        lenis.raf(time);
+        animationFrameId = requestAnimationFrame(raf);
+      }
+
+      animationFrameId = requestAnimationFrame(raf);
+
+      return () => {
+        cancelAnimationFrame(animationFrameId);
+        lenis.destroy();
+      };
+    } catch {
+      // Fallback to native scrolling
+    }
   }, []);
 
   return (

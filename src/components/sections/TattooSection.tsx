@@ -122,6 +122,16 @@ export const TattooSection = () => {
                     loop
                     muted
                     playsInline
+                    preload="auto"
+                    disablePictureInPicture
+                    disableRemotePlayback
+                    ref={(el) => {
+                      if (el) {
+                        el.defaultMuted = true;
+                        el.muted = true;
+                        el.play().catch(() => {});
+                      }
+                    }}
                     className="w-full h-full object-cover opacity-85"
                   />
                 ) : (
@@ -198,7 +208,7 @@ export const TattooSection = () => {
         </div>
 
         {/* DESKTOP ACCORDION CARDS - MANTIDO EM RESOLUÇÕES MAIORES (>=768px) */}
-        <div className="hidden md:grid w-full min-h-[560px] md:min-h-[620px] grid-cols-1 lg:flex gap-6 items-stretch mb-10">
+        <div className="hidden md:flex gap-4 lg:gap-6 min-h-[560px] lg:min-h-[620px] mb-12">
           {tattooStyles.map((style, idx) => {
             const isActive = activeIndex === idx;
 
@@ -206,15 +216,12 @@ export const TattooSection = () => {
               <motion.div
                 key={style.id}
                 onClick={() => setActiveIndex(idx)}
-                onMouseEnter={() => setActiveIndex(idx)}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.1 }}
-                className={`cursor-pointer rounded-none transition-all duration-500 ease-out border-2 overflow-hidden relative flex flex-col justify-between p-6 md:p-10 ${
-                  isActive
-                    ? 'lg:flex-[2.8] border-white/80'
-                    : 'lg:flex-[1] border-white/20 hover:border-white/40 hover:brightness-110'
+                layout
+                transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                className={`relative overflow-hidden cursor-pointer border-2 transition-colors duration-500 flex flex-col justify-between p-6 lg:p-8 bg-black ${
+                  isActive 
+                    ? 'flex-[2.5] border-[#5E308A] shadow-[0_0_40px_rgba(94,48,138,0.35)]' 
+                    : 'flex-[1] border-white/10 hover:border-white/30'
                 }`}
               >
                 {/* Background High-Visibility Media (Video / Image) */}
@@ -226,6 +233,16 @@ export const TattooSection = () => {
                       loop
                       muted
                       playsInline
+                      preload="auto"
+                      disablePictureInPicture
+                      disableRemotePlayback
+                      ref={(el) => {
+                        if (el) {
+                          el.defaultMuted = true;
+                          el.muted = true;
+                          el.play().catch(() => {});
+                        }
+                      }}
                       className={`w-full h-full object-cover transition-all duration-500 ${
                         isActive ? 'opacity-90 scale-105' : 'opacity-70 scale-100 hover:opacity-85'
                       }`}

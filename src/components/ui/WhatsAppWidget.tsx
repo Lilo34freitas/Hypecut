@@ -17,12 +17,27 @@ export const WhatsAppWidget = ({
     'Quer agendar? Chama no Zap!',
   ],
 }: WhatsAppWidgetProps) => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(() => {
+    try {
+      return localStorage.getItem('hypecut_whatsapp_popup_dismissed') !== 'true';
+    } catch {
+      return true;
+    }
+  });
   const [isPastHero, setIsPastHero] = useState(false);
   const [displayText, setDisplayText] = useState('');
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [typingSpeed, setTypingSpeed] = useState(100);
+
+  const dismissPopup = () => {
+    setIsVisible(false);
+    try {
+      localStorage.setItem('hypecut_whatsapp_popup_dismissed', 'true');
+    } catch {
+      // Ignore
+    }
+  };
 
   // Scroll listener to detect when user scrolls past Hero section
   useEffect(() => {
@@ -85,7 +100,10 @@ export const WhatsAppWidget = ({
             exit={{ opacity: 0, y: 15, scale: 0.85 }}
             transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             className="pointer-events-auto relative mb-3 w-[230px] xs:w-[270px] sm:w-[320px] bg-[#F2EAD9] text-[#0B0908] rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.45)] border border-[#0B0908]/15 p-3 sm:p-4 flex flex-col cursor-pointer transition-all hover:shadow-[0_20px_50px_rgba(0,0,0,0.55)] group"
-            onClick={() => window.open(whatsappUrl, '_blank', 'noopener,noreferrer')}
+            onClick={() => {
+              dismissPopup();
+              window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+            }}
           >
             {/* Pointer Arrow / Speech Bubble Tail (Navbar Color) */}
             <div className="absolute -bottom-2 right-6 sm:right-8 w-3.5 h-3.5 bg-[#F2EAD9] rotate-45 border-r border-b border-[#0B0908]/15 pointer-events-none" />
@@ -107,7 +125,7 @@ export const WhatsAppWidget = ({
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setIsVisible(false);
+                  dismissPopup();
                 }}
                 className="p-1 -mr-1 rounded-full text-[#0B0908]/50 hover:text-[#0B0908] hover:bg-[#0B0908]/10 transition-colors"
                 title="Fechar dica"
